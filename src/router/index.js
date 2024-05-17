@@ -19,9 +19,9 @@ const router = createRouter({
                     component: () => import('@/views/company/CompanyList.vue')
                 },
                 {
-                    path: '/displaies',
+                    path: '/display',
                     name: 'displaies',
-                    component: () => import('@/views/company/CompanyList.vue')
+                    component: () => import('@/views/company/CompanyDash.vue')
                 },
                 {
                     path: '/uikit/formlayout',
