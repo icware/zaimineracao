@@ -9,18 +9,28 @@
                 <i class="pi pi-building text-2xl"></i>
             </div>
         </div>
-        <div class="flex justify-content-between">
+        <div class="flex-column ">
             <span :class="codeClass">{{ levelUser }}</span>
             <span class="text-500">
-
+                <Dropdown v-model="selectedCity" :options="cities" optionLabel="name" placeholder="Seleciona a opção"
+                    class="w-full md:w-14rem mt-5  " />
             </span>
         </div>
     </div>
 </template>
 
 <script setup>
-import { computed } from 'vue';
-import { defineProps } from 'vue';
+import { computed, defineProps, ref } from 'vue';
+
+
+const selectedCity = ref();
+const cities = ref([
+    { name: 'Monitor BI' },
+    { name: 'Detalhe' },
+    { name: 'Configurar' },
+    { name: 'Area' },
+    { name: 'Usuários' }
+]);
 
 const props = defineProps({
     name: {
@@ -37,14 +47,13 @@ const props = defineProps({
     }
 });
 
-//const iconClass = computed(() => (props.status === 'active' ? 'pi-sitemap text-green-500' : 'pi-sitemap text-red-500'));
 
-const titleCompany = computed(() => props.name = "Nome da empresa");
-const levelUser = computed(() => props.levelUser = "Level");
+const titleCompany = computed(() => props.name);
+const levelUser = computed(() => props.levelUser);
 
 // Ajustando a lógica para code e codeClass
 const codeClass = computed(() => (props.code ? 'text-green-500' : 'text-red-500'));
-const code = computed(() => props.code = "002");
+const code = computed(() => props.code);
 
 </script>
 
