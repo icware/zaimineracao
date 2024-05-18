@@ -23,6 +23,7 @@ const router = createRouter({
                     name: 'displaies',
                     component: () => import('@/views/company/CompanyDash.vue')
                 },
+
                 {
                     path: '/uikit/formlayout',
                     name: 'formlayout',
