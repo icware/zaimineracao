@@ -7,6 +7,8 @@
 
 <script setup>
 import DisplayHeader from '@/components/DisplayHeader.vue';
+import TableInstance from '@/componets/TableInstance.vue';
+import TableTime from '@/components/TableTime.vue'
 
 const jsonData = [
     {

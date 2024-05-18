@@ -1,12 +1,19 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import AppLayout from '@/layout/AppLayout.vue';
+import Layout from '@/packages/dashboard/views/DashboardView.vue'
 
 const router = createRouter({
     history: createWebHistory(),
     routes: [
         {
+            path: '/zai',
+            component:Layout
+        },
+        
+        {
             path: '/',
             component: AppLayout,
+            
             children: [
                 {
                     path: '/',
