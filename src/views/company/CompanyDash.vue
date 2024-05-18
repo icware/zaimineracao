@@ -14,14 +14,17 @@ const jsonData = [
         "title": "Primário",
         "value": "26000",
         "pde": "50%",
-        "life": "12:80"
+        "life": "12:80",
+        "life_run": "12:80",
+        "life_shift": "12:80",
     },
     {
         "status": false,
         "title": "Secundário",
         "value": "12000",
         "pde": "75%",
-        "life": "08:30"
+        "life": "08:30",
+
     }
 ];
 
