@@ -3,14 +3,15 @@
     <div class="grid">
         <DisplayCompany v-for="(data, index) in jsonData" :key="index" v-bind="data" />
     </div>
-    <div>
+    <br>
+    <div class="grid  ">
         <ChartInline />
         <ChartBar />
 
-        <div class="flex-row">
-            <TableInstant />
-            <TableTime />
-        </div>
+
+        <TableInstant />
+        <TableTime />
+
     </div>
 
 </template>
