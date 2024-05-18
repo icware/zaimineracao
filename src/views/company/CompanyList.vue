@@ -3,10 +3,29 @@
     <div class="grid">
         <DisplayCompany v-for="(data, index) in jsonData" :key="index" v-bind="data" />
     </div>
+    <div>
+        <ChartInline />
+        <ChartBar />
+
+        <div class="flex-row">
+            <TableInstant />
+            <TableTime />
+        </div>
+    </div>
+
 </template>
 
 <script setup>
 import DisplayCompany from '@/components/DisplayCompany.vue';
+import ChartInline from '../../components/ChartInline.vue';
+import ChartBar from '../../components/ChartBar.vue';
+
+
+import TableInstant from '../../components/TableInstant.vue';
+import TableTime from '../../components/TableTime.vue';
+
+
+
 
 const jsonData = [
     {
@@ -31,6 +50,5 @@ const jsonData = [
     },
 ];
 
-</script>
 
-<style lang="scss" scoped></style>
+</script>

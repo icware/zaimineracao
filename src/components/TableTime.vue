@@ -24,6 +24,7 @@
                 </Column>
             </DataTable>
         </div>
+    </div>
 </template>
 
 <script setup>
