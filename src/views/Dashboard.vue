@@ -2,8 +2,12 @@
 import { onMounted, reactive, ref, watch } from 'vue';
 import { ProductService } from '@/service/ProductService';
 import { useLayout } from '@/layout/composables/layout';
+import { StoreService } from '@/service/StoreService';
 
-const { isDarkTheme } = useLayout();
+const { isDarkTheme, layoutConfig } = useLayout();
+
+
+const useStore = new StoreService();
 
 const products = ref(null);
 const lineData = reactive({
@@ -36,6 +40,7 @@ const productService = new ProductService();
 
 onMounted(() => {
     productService.getProductsSmall().then((data) => (products.value = data));
+
 });
 
 const formatCurrency = (value) => {
@@ -116,7 +121,6 @@ watch(
 
 <template>
     <div class="grid">
-
         <div class="col-12 lg:col-6 xl:col-3">
             <div class="card mb-0">
                 <div class="flex justify-content-between mb-3">
@@ -135,7 +139,6 @@ watch(
                 </div>
             </div>
         </div>
-
 
         <div class="col-12 lg:col-6 xl:col-3">
             <div class="card mb-0">

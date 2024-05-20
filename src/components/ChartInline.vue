@@ -1,12 +1,13 @@
 <template>
-    <div class="col-5">
-        <div class="card">
+    <div class="col-12 lg:col-6 xl:col-6 mb-3">
+        <div class="card mb-3">
             <h5>Desempenho</h5>
             <div class="chart-container">
                 <Chart type="line" :data="lineData" :options="lineOptions" />
             </div>
         </div>
     </div>
+
 </template>
 
 <script setup>
@@ -30,6 +31,14 @@ const lineData = reactive({
         {
             label: 'Second Dataset',
             data: [28, 48, 40, 19, 86, 27, 90],
+            fill: false,
+            backgroundColor: '#00bb7e',
+            borderColor: '#00bb7e',
+            tension: 0.4
+        },
+        {
+            label: 'Second Dataset 5',
+            data: [28, 48, 32, 19, 86, 80, 90],
             fill: false,
             backgroundColor: '#00bb7e',
             borderColor: '#00bb7e',

@@ -1,7 +1,8 @@
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { usePrimeVue } from 'primevue/config';
 import { useLayout } from '@/layout/composables/layout';
+
 
 defineProps({
     simple: {
@@ -10,20 +11,21 @@ defineProps({
     }
 });
 
+
 const $primevue = usePrimeVue();
-const inputStyle = computed(() => $primevue.config.inputStyle || 'outlined');
+// const inputStyle = computed(() => $primevue.config.inputStyle || 'outlined');
 
 // Fontes disponiveis
-const scales = ref([12, 13, 14, 15, 16]);
+const scales = ref([10, 12, 13, 14, 15, 16, 17]);
 
 const visible = ref(false);
-const inputStyles = ref([
-    { label: 'Outlined', value: 'outlined' },
-    { label: 'Filled', value: 'filled' }
-]);
+// const inputStyles = ref([
+//     { label: 'Outlined', value: 'outlined' },
+//     { label: 'Filled', value: 'filled' }
+// ]);
 const menuModes = ref([
-    { label: 'Static', value: 'static' },
-    { label: 'Overlay', value: 'overlay' }
+    { label: 'Estático', value: 'static' },
+    { label: 'Sobreposto', value: 'overlay' }
 ]);
 const compactMaterial = ref(false);
 const primaryFocusRing = ref(true);
@@ -34,11 +36,13 @@ const onConfigButtonClick = () => {
     visible.value = !visible.value;
 };
 const onChangeTheme = (theme, mode) => {
+
     $primevue.changeTheme(layoutConfig.theme.value, theme, 'theme-css', () => {
         layoutConfig.theme.value = theme;
         layoutConfig.darkTheme.value = mode;
     });
 };
+
 const decrementScale = () => {
     setScale(layoutConfig.scale.value - 1);
     applyScale();
@@ -50,15 +54,15 @@ const incrementScale = () => {
 const applyScale = () => {
     document.documentElement.style.fontSize = layoutConfig.scale.value + 'px';
 };
-const onInputStyleChange = (value) => {
-    $primevue.config.inputStyle = value;
-};
+// const onInputStyleChange = (value) => {
+//     $primevue.config.inputStyle = value;
+// };
 const onMenuModeChange = (value) => {
     layoutConfig.menuMode.value = value;
 };
-const onRippleChange = (value) => {
-    layoutConfig.ripple.value = value;
-};
+// const onRippleChange = (value) => {
+//     layoutConfig.ripple.value = value;
+// };
 const onDarkModeChange = (value) => {
     const newThemeName = value ? layoutConfig.theme.value.replace('light', 'dark') : layoutConfig.theme.value.replace('dark', 'light');
 
@@ -125,7 +129,7 @@ const onFocusRingColorChange = (value) => {
     <Sidebar v-model:visible="visible" position="right" class="layout-config-sidebar w-26rem" pt:closeButton="ml-auto">
         <div class="p-2">
             <section class="pb-4 flex align-items-center justify-content-between border-bottom-1 surface-border">
-                <span class="text-xl font-semibold">Scale</span>
+                <span class="text-xl font-semibold">Escala</span>
                 <div class="flex align-items-center gap-2 border-1 surface-border py-1 px-2"
                     style="border-radius: 30px">
                     <Button icon="pi pi-minus" @click="decrementScale" text rounded
@@ -139,31 +143,31 @@ const onFocusRingColorChange = (value) => {
             </section>
 
             <section class="py-4 flex align-items-center justify-content-between border-bottom-1 surface-border">
-                <span :class="['text-xl font-semibold']">Dark Mode</span>
+                <span :class="['text-xl font-semibold']">Dark</span>
                 <InputSwitch :modelValue="layoutConfig.darkTheme.value" @update:modelValue="onDarkModeChange" />
             </section>
 
             <template v-if="!simple">
                 <section class="py-4 flex align-items-center justify-content-between border-bottom-1 surface-border">
-                    <span class="text-xl font-semibold">Menu Type</span>
+                    <span class="text-xl font-semibold">Menu</span>
                     <SelectButton :modelValue="layoutConfig.menuMode.value" @update:modelValue="onMenuModeChange"
                         :options="menuModes" optionLabel="label" optionValue="value" :allowEmpty="false" />
                 </section>
 
-                <section class="py-4 flex align-items-center justify-content-between border-bottom-1 surface-border">
+                <!-- <section class="py-4 flex align-items-center justify-content-between border-bottom-1 surface-border">
                     <span class="text-xl font-semibold">Input Variant</span>
                     <SelectButton :modelValue="inputStyle" @update:modelValue="onInputStyleChange"
                         :options="inputStyles" optionLabel="label" optionValue="value" :allowEmpty="false" />
-                </section>
+                </section> -->
             </template>
 
-            <section class="py-4 flex align-items-center justify-content-between border-bottom-1 surface-border">
+            <!-- <section class="py-4 flex align-items-center justify-content-between border-bottom-1 surface-border">
                 <span class="text-xl font-semibold">Ripple Effect</span>
                 <InputSwitch :modelValue="layoutConfig.ripple.value" @update:modelValue="onRippleChange" />
-            </section>
+            </section> -->
 
             <section class="py-4 border-bottom-1 surface-border">
-                <div class="text-xl font-semibold mb-3">Themes</div>
+                <div class="text-xl font-semibold mb-3">Estilos</div>
                 <div class="flex align-items-center gap-2 mb-3">
                     <img src="https://primefaces.org/cdn/primevue/images/themes/aura.png" alt="Aura"
                         style="width: 1.5rem" />
@@ -326,7 +330,7 @@ const onFocusRingColorChange = (value) => {
                 <div class="flex align-items-center gap-2 mb-3">
                     <img src="https://primefaces.org/cdn/primevue/images/themes/md-light-indigo.svg"
                         alt="Material Design" class="border-circle" style="width: 1.5rem" />
-                    <span class="font-medium">Material Design</span>
+                    <span class="font-medium">Material</span>
                     <div class="ml-auto flex align-items-center gap-2">
                         <label for="material-condensed" class="text-sm">Condensed</label>
                         <InputSwitch inputId="material-condensed" :modelValue="compactMaterial"

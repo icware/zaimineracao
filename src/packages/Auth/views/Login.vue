@@ -4,8 +4,7 @@ import { ref, computed, onMounted } from 'vue';
 import AppConfig from '@/layout/AppConfig.vue';
 import useAuthModel from '@/models/Auth';
 import { useRouter } from 'vue-router';
-import { AuthLogin } from '@/controllers/AuthController';
-import { validField, validEmail } from '@/controllers/ValidateController';
+
 
 const { layoutConfig } = useLayout();
 const email = ref('');

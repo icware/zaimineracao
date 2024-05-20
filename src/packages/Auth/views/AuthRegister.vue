@@ -48,10 +48,9 @@
 
 
 <script setup>
-import { AuthRegister } from '@/controllers/AuthController';
 import { reactive, ref } from 'vue';
 import { useRoute } from 'vue-router';
-import { validField, validEmail, compareField } from '@/controllers/ValidateController';
+
 
 //uses
 const router = useRoute();

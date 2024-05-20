@@ -1,9 +1,9 @@
 <template>
-    <div class="col-12 lg:col-6 xl:col-3">
-        <div :class="['card mb-0 status-card', statusClass]">
-            <div class="flex justify-content-between mb-3">
+    <div v-if="visible" class="col-12 lg:col-2 xl:col-auto mb-0">
+        <div :class="['card mb-0 status-card']">
+            <div class="flex justify-content-between mb-0">
                 <div>
-                    <span class="block text-500 font-medium mb-3"> {{ title }} </span>
+                    <span class="block text-500 font-medium mb-0"> {{ name }}</span>
                     <div class="text-900 font-medium text-xl">{{ value }}</div>
                 </div>
                 <div class="flex align-items-center justify-content-center icon-container">
@@ -20,14 +20,18 @@
 </template>
 
 <script setup>
-import { computed, ref } from 'vue';
+import { computed, ref, defineProps } from 'vue';
 
 const props = defineProps({
+    visible: {
+        type: Boolean,
+        required: true
+    },
     status: {
         type: Boolean,
         required: true
     },
-    title: {
+    name: {
         type: String,
         required: true
     },
@@ -48,10 +52,9 @@ const props = defineProps({
     },
 });
 
-
 const statusClass = computed(() => (props.status ? 'true' : 'false'));
 const iconClass = computed(() => (props.status ? 'pi-sitemap text-green-500' : 'pi-sitemap text-red-500'));
-const { title, value, pde, life } = props;
+const { name, value, pde, life } = props;
 
 </script>
 

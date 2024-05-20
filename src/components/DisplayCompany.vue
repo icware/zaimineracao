@@ -2,7 +2,7 @@
     <div :class="['card mb-0 status-card']">
         <div class="flex justify-content-between mb-3">
             <div>
-                <span class="block text-xl font-medium mb-3"> {{ titleCompany }} </span>
+                <span class="block text-xl font-medium mb-3"> {{ name }} </span>
                 <div class="text-900 font-medium text-500">{{ code }}</div>
             </div>
             <div class="flex align-items-center justify-content-center icon-container">
@@ -10,50 +10,41 @@
             </div>
         </div>
         <div class="flex-column ">
-            <span :class="codeClass">{{ levelUser }}</span>
             <span class="text-500">
-                <Dropdown v-model="selectedCity" :options="cities" optionLabel="name" placeholder="Seleciona a opção"
-                    class="w-full md:w-14rem mt-5  " />
+                <Button @click="selectCompany(code)">Selecionar</Button>
             </span>
         </div>
     </div>
 </template>
 
 <script setup>
-import { computed, defineProps, ref } from 'vue';
+import { defineProps } from 'vue';
+import { StoreService } from '@/service/StoreService';
+import { useRouter } from 'vue-router';
 
+const useStoreService = new StoreService();
+const router = useRouter();
 
-const selectedCity = ref();
-const cities = ref([
-    { name: 'Monitor BI' },
-    { name: 'Detalhe' },
-    { name: 'Configurar' },
-    { name: 'Area' },
-    { name: 'Usuários' }
-]);
+function selectCompany(code) {
+    useStoreService.setValue('company', code);
+    router.push('/dashboard');
+}
 
 const props = defineProps({
-    name: {
-        type: String,
-        required: true
-    },
-    levelUser: {
-        type: String,
+    id: {
+        type: Number,
         required: true
     },
     code: {
         type: String,
         required: true
+    },
+    name: {
+        type: String,
+        required: true
     }
 });
 
-
-const titleCompany = computed(() => props.name);
-const levelUser = computed(() => props.levelUser);
-
-// Ajustando a lógica para code e codeClass
-const codeClass = computed(() => (props.code ? 'text-green-500' : 'text-red-500'));
-const code = computed(() => props.code);
 
 </script>
 
