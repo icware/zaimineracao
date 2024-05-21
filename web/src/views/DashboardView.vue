@@ -1,125 +1,80 @@
 <script setup>
-import { onMounted, ref, watch } from 'vue';
+import { computed, onMounted, ref, watch, nextTick } from 'vue';
 import { useLayout } from '@/layout/composables/layout';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '@/store/AuthStore';
 import { CompanyService } from '@/service/company/CompanyService';
 import { StoreService } from '@/service/StoreService';
-
-// Componentes
-import DashDisplay from '@/components/DashDisplay.vue';
+import { useCompanyStore } from '@/store/CompanyStore';
+import { optionsThemeLight, otptionsThemeDark } from '@/views/company/composables/company';
 
 const { isDarkTheme } = useLayout();
+
 const auth = useAuthStore();
+const useCompany = useCompanyStore();
+
 const useStoreService = new StoreService();
 const router = useRouter();
-const lineOptions = ref(null);
+const lineOptions = ref({});
+const barOptions = ref({});
 
-const companyData = ref({});
 const companyAreaDisplay = ref({});
-const companyAreasFlowrate = ref([]);
-const companyAreasTimers = ref([]);
-const companyAreasCharts = ref([]);
 
+// Seção de filtro
+const userFilter = ref(false);
+const displayfilter = ref(false);
+const urlFilter = ref('');
+const startDate = ref(null);
+const startTime = ref(null);
+const endDate = ref(null);
+const endTime = ref(null);
+
+// Sessão do layout
+const layout = ref('grid');
+const sortKey = ref(null);
+const sortOrder = ref(null);
+const sortField = ref(null);
+
+const sortOptions = ref([
+    { label: 'Ativo', value: '!item.flowrate.status' },
+    { label: 'Inativo', value: 'item.flowrate.status' }
+]);
+
+const chartOptions = ref([
+    { label: 'Linhas', value: 'line' },
+    { label: 'Barras', value: 'bar' }
+]);
 
 async function getCompanyData() {
     if (auth.getIsAuth) {
         const companySelected = useStoreService.getValue('company');
         if (companySelected) {
             const companyService = new CompanyService();
-            const response = await companyService.getCompanyData(companySelected);
-            companyData.value = response.data;
-            companyAreaDisplay.value = response.data.areas;
-            companyAreasFlowrate.value = response.data.areas.map(area => ({
-                name: area.name,
-                value: area.flowrate.value,
-                percent: area.flowrate.percent,
-                status: area.flowrate.status ? "Ativo" : "Inativo",
-                first_time: area.flowrate.first_time,
-                last_time: area.flowrate.last_time
-            }));
-
-            companyAreasTimers.value = response.data.areas.map(area => ({
-                name: area.name,
-                min: area.timers.min,
-                med: area.timers.med,
-                max: area.timers.max,
-            }));
-
-            companyAreasCharts.value = response.data.areas.map(area => ({
-
-            }));
-
+            const response = await companyService.getCompanyData(companySelected, urlFilter.value || '');
+            useCompany.setData(response.data);
         }
     }
 }
 
+function getLocalData() {
+    companyAreaDisplay.value = useCompany.getCompanyData;
+}
+
 async function fetchData() {
     await getCompanyData();
+    getLocalData();
 }
 
 
-
 const applyLightTheme = () => {
-    lineOptions.value = {
-        plugins: {
-            legend: {
-                labels: {
-                    color: '#495057'
-                }
-            }
-        },
-        scales: {
-            x: {
-                ticks: {
-                    color: '#495057'
-                },
-                grid: {
-                    color: '#ebedef'
-                }
-            },
-            y: {
-                ticks: {
-                    color: '#495057'
-                },
-                grid: {
-                    color: '#ebedef'
-                }
-            }
-        }
-    };
-};
+    lineOptions.value = optionsThemeLight.lineOptions
+    barOptions.value = optionsThemeLight.barOptions
+}
 
 const applyDarkTheme = () => {
-    lineOptions.value = {
-        plugins: {
-            legend: {
-                labels: {
-                    color: '#ebedef'
-                }
-            }
-        },
-        scales: {
-            x: {
-                ticks: {
-                    color: '#ebedef'
-                },
-                grid: {
-                    color: 'rgba(160, 167, 181, .3)'
-                }
-            },
-            y: {
-                ticks: {
-                    color: '#ebedef'
-                },
-                grid: {
-                    color: 'rgba(160, 167, 181, .3)'
-                }
-            }
-        }
-    };
-};
-
+    lineOptions.value = otptionsThemeDark.lineOptions
+    barOptions.value = otptionsThemeDark.barOptions
+}
 
 watch(
     isDarkTheme,
@@ -133,14 +88,6 @@ watch(
     { immediate: true }
 );
 
-const layout = ref('grid');
-const sortKey = ref(null);
-const sortOrder = ref(null);
-const sortField = ref(null);
-const sortOptions = ref([
-    { label: 'Price High to Low', value: '!price' },
-    { label: 'Price Low to High', value: 'price' }
-]);
 
 const onSortChange = (event) => {
     const value = event.value.value;
@@ -156,6 +103,18 @@ const onSortChange = (event) => {
         sortKey.value = sortValue;
     }
 };
+
+const onChartShowChange = (value, itemId) => {
+    const showChartSettings = useStoreService.getJson('showChartSettings') || {};
+    showChartSettings[itemId] = value;
+    useStoreService.setJson('showChartSettings', showChartSettings);
+}
+const onChartTypeChange = (value, itemId) => {
+    const CahrtTypeSettings = useStoreService.getJson('CahrtTypeSettings') || {};
+    CahrtTypeSettings[itemId] = value;
+    useStoreService.setJson('CahrtTypeSettings', CahrtTypeSettings);
+    console.log(CahrtTypeSettings);
+}
 
 const getSeverity = (product) => {
     switch (product.inventoryStatus) {
@@ -175,146 +134,265 @@ const getSeverity = (product) => {
 
 onMounted(() => {
     fetchData();
+    getLocalData();
+    setInterval(getLocalData, 5000);
     setInterval(fetchData, 30000);
+
 });
 
 
+const OpenFilter = () => {
+    displayfilter.value = true;
+};
+
+const applyFilter = async () => {
+    displayfilter.value = false;
+    urlFilter.value = buildUrlParams();
+    await fetchData();
+    await nextTick();
+};
+
+const formatDate = (date) => {
+    if (!date) return '';
+    const isoDate = new Date(date);
+    const year = isoDate.getFullYear();
+    const month = String(isoDate.getMonth() + 1).padStart(2, '0');
+    const day = String(isoDate.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+};
+
+const formatTime = (time) => {
+    if (!time) return '';
+    const [hours, minutes, seconds] = time.split(':');
+    const formattedTime = `${hours}%3A${minutes}`;
+    return seconds ? `${formattedTime}%3A${seconds}` : formattedTime;
+};
+
+const buildUrlParams = () => {
+    const queryParams = {};
+    if (startDate.value) queryParams["date_start"] = formatDate(startDate.value);
+    if (endDate.value) queryParams["date_end"] = formatDate(endDate.value);
+    if (startTime.value) queryParams["time_start"] = formatTime(startTime.value);
+    if (endTime.value) queryParams["time_end"] = formatTime(endTime.value);
+    return new URLSearchParams(queryParams).toString();
+};
+
+const removeFilter = async () => {
+    userFilter.value = false;
+    displayfilter.value = false;
+    urlFilter.value = null;
+    startDate.value = null;
+    startTime.value = null;
+    endDate.value = null;
+    endTime.value = null;
+    await fetchData();
+    await nextTick();
+}
 </script>
 
 <template>
 
-    <div class="gri">
+    <div class="grid">
         <div class="col-12">
-            <h5> Displayes de produção </h5>
-            <DataView :value="companyAreaDisplay" :layout="layout" :paginator="true" :rows="9" :sortOrder="sortOrder"
-                :sortField="sortField">
-                <template>
-                    <div class="grid grid-nogutter">
-                        <div class="col-6 text-left">
-                            <Dropdown v-model="sortKey" :options="sortOptions" optionLabel="label"
-                                placeholder="Sort By Price" @change="onSortChange($event)" />
-                        </div>
-                        <div class="col-6 text-right">
-                            <DataViewLayoutOptions v-model="layout" />
-                        </div>
-                    </div>
+            <div class="cad">
+                <h5> Displayes de produção </h5>
+                <DataView :value="companyAreaDisplay.areas" :layout="layout" :paginator="true" :rows="9"
+                    :sortOrder="sortOrder" :sortField="sortField">
+                    <template #header>
+                        <div class="grid grid-nogutter">
+                            <div class="col-6 text-left">
+                                <Dropdown v-model="sortKey" :options="sortOptions" optionLabel="label" class="mr-2"
+                                    placeholder="Ordenar por Status" @change="onSortChange($event)" />
 
-                </template>
+                                <Button label="Filtro" icon="pi pi-filter-fill" style="width: auto"
+                                    @click="OpenFilter" />
 
-                <template #list="slotProps">
-                    <div class="grid grid-nogutter">
-                        <div v-for="(item, index) in slotProps.items" :key="index" class="col-12">
-                            <div class="flex flex-column sm:flex-row sm:align-items-center p-4 gap-3"
-                                :class="{ 'border-top-1 surface-border': index !== 0 }">
-                                <div class="md:w-10rem relative">
-                                    <img class="block xl:block mx-auto border-round w-full"
-                                        :src="`https://primefaces.org/cdn/primevue/images/product/${item.image}`"
-                                        :alt="item.name" />
-                                    <Tag :value="item.inventoryStatus" :severity="getSeverity(item)" class="absolute"
-                                        style="left: 4px; top: 4px"></Tag>
-                                </div>
-                                <div
-                                    class="flex flex-column md:flex-row justify-content-between md:align-items-center flex-1 gap-4">
-                                    <div
-                                        class="flex flex-row md:flex-column justify-content-between align-items-start gap-2">
-                                        <div>
-                                            <span class="font-medium text-secondary text-sm">{{ item.category }}</span>
-                                            <div class="text-lg font-medium text-900 mt-2">{{ item.name }}</div>
-                                        </div>
-                                        <div class="surface-100 p-1" style="border-radius: 30px">
-                                            <div class="surface-0 flex align-items-center gap-2 justify-content-center py-1 px-2"
-                                                style="border-radius: 30px; box-shadow: 0px 1px 2px 0px rgba(0, 0, 0, 0.04), 0px 1px 2px 0px rgba(0, 0, 0, 0.06)">
-                                                <span class="text-900 font-medium text-sm">{{ item.rating }}</span>
-                                                <i class="pi pi-star-fill text-yellow-500"></i>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="flex flex-column md:align-items-end gap-5">
-                                        <span class="text-xl font-semibold text-900">${{ item.price }}</span>
-                                        <div class="flex flex-row-reverse md:flex-row gap-2">
-                                            <Button icon="pi pi-heart" outlined></Button>
-                                            <Button icon="pi pi-shopping-cart" label="Buy Now"
-                                                :disabled="item.inventoryStatus === 'OUTOFSTOCK'"
-                                                class="flex-auto md:flex-initial white-space-nowrap"></Button>
-                                        </div>
-                                    </div>
-                                </div>
+                            </div>
+
+                            <div class="col-6 text-right">
+                                <DataViewLayoutOptions v-model="layout" />
                             </div>
                         </div>
-                    </div>
-                </template>
 
-                <template #grid="slotProps">
-                    <div class="grid grid-nogutter">
-                        <div v-for="(item, index) in slotProps.items" :key="index" class="col-12 sm:col-6 md:col-4 p-2">
-                            <div class="p-4 border-1 surface-border surface-card border-round flex flex-column">
+                    </template>
 
-                                <div class="surface-50 flex justify-content-center border-round p-3">
-                                    <div class="relative mx-auto">
+                    <template #list="slotProps">
+                        <div class="grid grid-nogutter">
+                            <div v-for="(item, index) in slotProps.items" :key="index" class="col-12">
+                                <div class="flex flex-column sm:flex-row sm:align-items-center p-4 gap-3"
+                                    :class="{ 'border-top-1 surface-border': index !== 0 }">
+                                    <div class="md:w-10rem relative">
                                         {{ item.name }}
                                     </div>
-                                    <div class="flex align-items-center gap-2 justify-content-center py-1 px-2">
-                                        <i v-if="item.status" class="pi pi-sitemap text-green-500"></i>
-                                        <i v-else="!item.status" class="pi pi-sitemap text-red-500"></i>
-                                    </div>
-                                </div>
-
-                                <div class="pt-4">
-
-                                    <div class="flex flex-row justify-content-between align-items-start gap-2">
-                                        <div class="p-1" style="border-radius: 30px">
-                                            Hora Inicial
-                                        </div>
-                                        <div>
-                                            <div v-if="item.flowrate.first_time"
-                                                class="text-lg font-medium text-900 mt-1">
-                                                {{ item.flowrate.first_time }}
+                                    <div
+                                        class="flex flex-column md:flex-row justify-content-between md:align-items-center flex-1 gap-4">
+                                        <div
+                                            class="flex flex-row md:flex-column justify-content-between align-items-start gap-2">
+                                            <div>
+                                                <span class="font-medium text-secondary text-sm"> Inicio </span>
+                                                <div class="text-lg font-medium text-900 mt-2">{{
+                                                    item.flowrate.first_time
+                                                }}</div>
+                                            </div>
+                                            <div>
+                                                <span class="font-medium text-secondary text-sm"> Final </span>
+                                                <div class="text-lg font-medium text-900 mt-2">{{
+                                                    item.flowrate.last_time
+                                                }}</div>
                                             </div>
                                         </div>
-                                    </div>
-
-                                    <div class="flex flex-row justify-content-between align-items-start gap-2">
-                                        <div class="p-1" style="border-radius: 30px">
-                                            Situação
-                                        </div>
-                                        <div>
-                                            <div v-if="item.flowrate.status" class="text-lg font-medium text-900 mt-1">
-                                                Ativo /( {{ item.flowrate.value }} )
-                                            </div>
-                                            <div v-else="!item.flowrate.status">
-                                                Inativo
+                                        <div
+                                            class="flex flex-row md:flex-column justify-content-between align-items-start gap-2">
+                                            <div>
+                                                <span class="font-medium text-secondary text-sm"> Final </span>
+                                                <div class="text-lg font-medium text-900 mt-2">{{
+                                                    item.flowrate.last_time
+                                                }}</div>
                                             </div>
                                         </div>
-                                    </div>
 
-
-                                    <div class="flex flex-column gap-4 mt-4">
-                                        <span class="text-2xl font-semibold text-900">{{ item.accumulated.value
-                                            }}</span>
-                                        <div class="flex gap-2">
-                                            <Button icon="pi pi-shopping-cart" label="Abrir"
-                                                :disabled="item.inventoryStatus === 'OUTOFSTOCK'"
-                                                class="flex-auto white-space-nowrap"></Button>
+                                        <div
+                                            class="flex flex-row md:flex-column justify-content-between align-items-start gap-2">
+                                            <div>
+                                                <span class="font-medium text-secondary text-sm"> Final </span>
+                                                <div class="text-lg font-medium text-900 mt-2">{{
+                                                    item.flowrate.last_time
+                                                }}</div>
+                                            </div>
                                         </div>
-                                        <div class="chart-container">
-                                            <Chart type="line" :data="item" :options="lineOptions" />
+                                        <div class="flex flex-column md:align-items-end gap-5">
+                                            <span class="text-xl font-semibold text-900">${{ item.price }}</span>
+                                            <div class="flex flex-row-reverse md:flex-row gap-2">
+                                                <span class="text-2xl font-semibold text-900">{{ item.accumulated.value
+                                                    }}
+                                                </span>
+                                                <span class="text-2xl font-semibold text-900">{{ item.accumulated.pde
+                                                    }}</span>
+
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                </template>
+                    </template>
 
-            </DataView>
+                    <template #grid="slotProps">
+                        <div class="grid grid-nogutter">
+                            <div v-for="(item, index) in slotProps.items" :key="index"
+                                class="col-12 sm:col-6 md:col-4 p-2">
+                                <div v-if="item.visible"
+                                    class="p-4 border-1 surface-border surface-card border-round flex flex-column">
+
+                                    <div class="flex justify-content-center border-round p-3 gap-3">
+                                        <div class="relative mx-auto mr-3">
+                                            {{ item.name }}
+                                        </div>
+                                        <span class="text-2xl font-semibold text-900">{{ item.accumulated.value
+                                            }}
+                                        </span>
+                                        <span class="text-2xl font-semibold text-900">{{ item.accumulated.pde
+                                            }}</span>
+                                        <div class="flex align-items-center gap-2 justify-content-center py-1 px-2">
+                                            <i v-if="item.status" class="pi pi-sitemap text-green-500"></i>
+                                            <i v-else="!item.status" class="pi pi-sitemap text-red-500"></i>
+                                        </div>
+                                    </div>
+
+                                    <div class="pt-4">
+
+                                        <div class="flex flex-row justify-content-between align-items-start gap-2">
+                                            <div class="p-1" style="border-radius: 30px">
+                                                Hora Inicial
+                                            </div>
+                                            <div>
+                                                <div v-if="item.flowrate.first_time"
+                                                    class="text-lg font-medium text-900 mt-1">
+                                                    {{ item.flowrate.first_time }}
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="flex flex-row justify-content-between align-items-start gap-2">
+                                            <div class="p-1" style="border-radius: 30px">
+                                                Situação
+                                            </div>
+                                            <div>
+                                                <div v-if="item.flowrate.status"
+                                                    class="text-lg font-medium text-900 mt-1">
+                                                    Ativo / {{ item.flowrate.value }}
+                                                </div>
+                                                <div v-else="!item.flowrate.status">
+                                                    Inativo
+                                                </div>
+                                            </div>
+                                        </div>
+
+
+                                        <div class="flex flex-column gap-4 mt-4">
+
+                                            <div v-if="item.showChart" class="chart-container">
+
+                                                <Chart v-if="item.chartType === 'bar'" type="bar" :data="item.chart"
+                                                    :options="barOptions" />
+                                                <Chart v-else="item.chartType === 'line'" type="line" :data="item.chart"
+                                                    :options="lineOptions" />
+
+                                                <Dropdown v-model="item.chartType" :options="chartOptions"
+                                                    optionLabel="label" class="mr-2" placeholder="Tipo de grafivo"
+                                                    @change="onChartTypeChange(item.chartType, item.id)" />
+                                            </div>
+                                            <div>
+                                                <Checkbox v-model="item.showChart" id="item.id" binary class="mr-2"
+                                                    @change="onChartShowChange(item.showChart, item.id)" />
+                                                <label for="item.id" class="mr-3">Exibir grafico</label>
+                                            </div>
+                                            <div class="flex gap-2">
+
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+
+                </DataView>
+            </div>
         </div>
     </div>
 
+    <Dialog header="Filtro" v-model:visible="displayfilter" :breakpoints="{ '960px': '75vw' }"
+        :style="{ width: '30vw' }" :modal="true">
+        <p class="line-height-3 m-0">
+        <h5>Data Inicial</h5>
+        <div class="flex col-10 gap-3">
+            <span>
+                <Calendar v-model="startDate" showIcon iconDisplay="input" />
+            </span>
+            <Calendar v-model="startTime" showIcon iconDisplay="input" timeOnly>
+                <template #inputicon="{ clickCallback }">
+                    <InputIcon class="pi pi-clock cursor-pointer" @click="clickCallback" />
+                </template>
+            </Calendar>
+        </div>
 
-    <div class="grid p-fluid">
-        <DashDisplay v-for="(area, index) in companyAreaDisplay" :key="index" :status="area.status" :name="area.name"
-            :value="area.accumulated.value" :pde="area.accumulated.pde" :life="area.accumulated.life"
-            :visible="area.visible" />
-    </div>
+        <h5>Data Final</h5>
+        <div class="flex col-10 gap-3">
+            <span>
+                <Calendar v-model="endDate" showIcon iconDisplay="input" />
+            </span>
+            <Calendar v-model="endTime" showIcon iconDisplay="input" timeOnly>
+                <template #inputicon="{ clickCallback }">
+                    <InputIcon class="pi pi-clock cursor-pointer" @click="clickCallback" />
+                </template>
+            </Calendar>
+        </div>
+        </p>
+        <template #footer>
+            <Button label="Remover Filtro" @click="removeFilter" icon="pi pi-check" class="p-button-outlined" />
+            <Button label="Aplicar Filtro" @click="applyFilter" icon="pi pi-check" class="p-button-outlined" />
+        </template>
+    </Dialog>
 
 </template>
