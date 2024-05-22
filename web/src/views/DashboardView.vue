@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onMounted, ref, watch, nextTick } from 'vue';
+import { onMounted, ref, watch, nextTick } from 'vue';
 import { useLayout } from '@/layout/composables/layout';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '@/store/AuthStore';
@@ -244,33 +244,34 @@ const removeFilter = async () => {
                                         <div
                                             class="flex flex-row md:flex-column justify-content-between align-items-start gap-2">
                                             <div>
-                                                <span class="font-medium text-secondary text-sm"> Final </span>
-                                                <div class="text-lg font-medium text-900 mt-2">{{
-                                                    item.flowrate.last_time
-                                                }}</div>
+                                                <span class="font-medium text-secondary text-sm"> Situação
+                                                    <div class="fs-4 ">
+                                                        <p v-if="item.flowrate.status">Ativo</p>
+                                                        <p v-else-if="!item.flowrate.status">Inativo</p>
+                                                    </div>
+                                                </span>
                                             </div>
                                         </div>
 
                                         <div
-                                            class="flex flex-row md:flex-column justify-content-between align-items-start gap-2">
+                                            class="flex flex-row md:flex-column  justify-content-between align-items-start gap-2">
                                             <div>
-                                                <span class="font-medium text-secondary text-sm"> Final </span>
-                                                <div class="text-lg font-medium text-900 mt-2">{{
-                                                    item.flowrate.last_time
-                                                }}</div>
-                                            </div>
-                                        </div>
-                                        <div class="flex flex-column md:align-items-end gap-5">
-                                            <span class="text-xl font-semibold text-900">${{ item.price }}</span>
-                                            <div class="flex flex-row-reverse md:flex-row gap-2">
-                                                <span class="text-2xl font-semibold text-900">{{ item.accumulated.value
-                                                    }}
+                                                <span class="font-medium text-secondary text-sm"> Total {{
+                                                    item.accumulated.value
+                                                }}
                                                 </span>
-                                                <span class="text-2xl font-semibold text-900">{{ item.accumulated.pde
-                                                    }}</span>
+                                            </div>
+                                            <div>
+                                                <span class="font-medium text-secondary text-sm"> Pde {{
+                                                    item.accumulated.pde
+                                                }}
+                                                </span>
 
                                             </div>
                                         </div>
+
+                                        <div class="flex align-items-center gap-2 justify-content-center py-1 px-2"><i
+                                                class="pi pi-sitemap text-green-500"></i></div>
                                     </div>
                                 </div>
                             </div>

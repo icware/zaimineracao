@@ -1,143 +1,179 @@
-<template>
-    <div>
-        <h1>Cadastre-se</h1>
-        <form @submit.prevent="submitForm">
-            <div>
-                <label for="first_name">Nome:</label>
-                <input v-model="data.first_name" type="text" id="first_name">
-            </div>
-            <div>
-                <label for="last_name">Sobrenome:</label>
-                <input v-model="data.last_name" type="text" id="last_name">
-            </div>
-            <div>
-                <label for="email">E-mail:</label>
-                <input ref="emailInput" v-model="data.email" type="email" id="email">
-                <div v-if="emailError" style="color: red;">
-                    {{ emailError }}
-                </div>
-            </div>
-            <div>
-                <label for="password">Senha:</label>
-                <input ref="passInput" v-model="data.password" type="password" id="password">
-                <div v-if="passError" style="color: red;">
-                    {{ passError }}
-                </div>
-            </div>
-            <div>
-                <label for="passConfirm">Confirmar Senha:</label>
-                <input ref="passConfirmInput" v-model="passConfirm" type="password" id="passConfirm">
-                <div v-if="passConfirmError" style="color: red;">
-                    {{ passConfirmError }}
-                </div>
-            </div>
-            <div>
-                <label for="phone">Telefone:</label>
-                <input v-model="data.phone" type="text" id="phone">
-            </div>
-            <div>
-                <button type="submit">Cadastrar</button>
-                <router-link to="/" class="button">Cancelar</router-link>
-            </div>
-            <div v-if="MessageError" role="alert">
-                {{ MessageError }}
-            </div>
-        </form>
-    </div>
-</template>
-
-
 <script setup>
-import { reactive, ref } from 'vue';
-import { useRoute } from 'vue-router';
+import { useLayout } from '@/layout/composables/layout';
+import { ref, onMounted, reactive } from 'vue';
+import AppConfig from '@/layout/AppConfig.vue';
+import { useRouter } from 'vue-router';
+import { useAuthStore } from '@/store/AuthStore';
+import { FieldValide } from '@/service/FieldValidate';
+import { AuthService } from '@/service/auth/AuthService';
 
 
-//uses
-const router = useRoute();
+const { layoutConfig } = useLayout();
+const fieldValide = new FieldValide();
+const authService = new AuthService();
 
-//erros
-const MessageError = ref('');
-const emailError = ref('');
-const passError = ref('');
-const passConfirmError = ref('');
-
-//refs
-const emailInput = ref(null);
-const passInput = ref(null);
-const passConfirmInput = ref(null);
+const router = useRouter();
+const auth = useAuthStore();
 
 
-//datas
-const passConfirm = ref('');
+// Datas
 const data = reactive({
-    first_name: '',
-    last_name: '',
-    email: '',
-    password: '',
-    phone: ''
+    first_name: ref(''),
+    last_name: ref(''),
+    email: ref(''),
+    password: ref(''),
+    confirmPassword: ref(''),
 });
+
+const MessageValid = ref('');
+const MenssageCad = ref('');
 
 function dataValidate(data) {
     let isValid = true;
 
     try {
-        isValid = validEmail(data.email);
+        isValid = isValid && fieldValide.field(data.first_name);
     } catch (error) {
-        emailInput.value.focus();
-        emailError.value = error.message;
         isValid = false;
     }
+
     try {
-        isValid = validField(data.password);
+        isValid = isValid && fieldValide.field(data.last_name);
     } catch (error) {
-        passInput.value.focus();
-        passError.value = error.message;
         isValid = false;
     }
+
     try {
-        isValid = validField(passConfirm.value);
+        isValid = isValid && fieldValide.field(data.email);
     } catch (error) {
-        passConfirmInput.value.focus();
-        passConfirmError.value = error.message;
         isValid = false;
     }
+
     try {
-        isValid = compareField(passConfirm.value, data.password);
+        isValid = isValid && fieldValide.field(data.password);
     } catch (error) {
-        passConfirmInput.value.focus();
-        passConfirmError.value = error.message;
         isValid = false;
+    }
+
+    try {
+        isValid = isValid && fieldValide.field(data.confirmPassword);
+    } catch (error) {
+        isValid = false;
+    }
+
+    // Check if passwords match
+    if (data.password !== data.confirmPassword) {
+        isValid = false;
+        MessageValid.value = "As senhas não são iguais!";
+    } else {
+        MessageValid.value = "";
     }
 
     return isValid;
 }
 
-async function submitForm() {
+async function register() {
     const isValid = dataValidate(data);
 
     if (!isValid) {
         return;
     }
-
+    console.log(data);
     try {
-        const response = await AuthRegister(data);
-
-        if (response.status === 201) {
-            MessageError.value = response.data.sucess;
-            router.push('/dashboard');
-        } else {
-            if (response.data) {
-                MessageError.value = response.data.error;
-            } else {
-                MessageError.value = 'Falha ao se cadastrar!';
-            }
-        }
+        await authService.register(data);
+        window.location.href = "/";
+        console.log('Apos redirecionar');
     } catch (error) {
-        MessageError.value = 'Falha ao se cadastrar!';
+        console.log(error);
+        MenssageCad.value = error.message;
     }
 
 }
 
+
+onMounted(() => {
+    // if (auth.getIsAuth) {
+    //     window.location.href = "/";
+    // }
+})
+
 </script>
 
-<style lang="scss" scoped></style>
+<template>
+    <div class="surface-ground flex align-items-center justify-content-center overflow-hidden p-4  ">
+        <div class="flex flex-column align-items-center justify-content-center">
+
+            <div
+                style="border-radius: 56px; padding: 0.3rem; background: linear-gradient(180deg, var(--primary-color) 10%, rgba(33, 150, 243, 0) 30%)">
+                <div class="w-full surface-card py-8 px-5 sm:px-8" style="border-radius: 53px">
+                    <div class="text-center mb-5">
+                        <img src="/images/login.jpg" alt="Sakai logo" class="mb-5 w-6rem flex-shrink-0" />
+                        <div class="text-900 text-4xl font-medium mb-0">Bem-vindo a Zai mineração!</div>
+                        <span class="text-600 font-medium">Faça seu cadastro</span>
+                    </div>
+
+
+                    <form @submit.prevent="register">
+                        <div class="flex flex-column gap-4">
+
+                            <div class="flex flex-row gap-4">
+                                <div class="flex flex-column">
+                                    <label for="first_name" class="block text-900 font-medium text-xl mb-2">Nome</label>
+                                    <InputText v-model="data.first_name" id="first_name" type="text"
+                                        class="w-full md:w-15rem mb-3" style="padding: 0.75rem;" />
+                                </div>
+                                <div class="flex flex-column">
+                                    <label for="last_name"
+                                        class="block text-900 font-medium text-xl mb-2">Sobrenome</label>
+                                    <InputText v-model="data.last_name" id="last_name" type="text"
+                                        class="w-full md:w-15rem mb-3" style="padding: 0.75rem;" />
+                                </div>
+                            </div>
+
+                            <div class="flex flex-column">
+                                <label for="email" class="block text-900 font-medium text-xl mb-2">Email</label>
+                                <InputText v-model="data.email" id="email" type="text" class="w-full md:w-40rem mb-3"
+                                    style="padding: 0.75rem;" />
+                            </div>
+
+                            <div class="flex flex-column">
+                                <label for="password" class="block text-900 font-medium text-xl mb-2">Senha</label>
+                                <Password v-model="data.password" id="password" placeholder="Senha" :toggleMask="true"
+                                    class="w-full mb-3" inputClass="w-full" :inputStyle="{ padding: '0.75rem' }">
+                                </Password>
+                            </div>
+
+                            <div class="flex flex-column">
+                                <label for="password" class="block text-900 font-medium text-xl mb-2">Confirmar
+                                    Senha</label>
+                                <Password v-model="data.confirmPassword" id="password" placeholder="Confirmar Senha"
+                                    :toggleMask="true" class="w-full mb-3" inputClass="w-full"
+                                    :inputStyle="{ padding: '0.75rem' }">
+                                </Password>
+                                <p v-if="MessageValid" style="color: red;">{{ MessageValid }}</p>
+                                <p v-else-if="MenssageCad" style="color: red;">{{ MenssageCad }}</p>
+                            </div>
+
+                            <Button type="submit" label="Cadastrar" class="w-full p-2 text-xl"></Button>
+
+                        </div>
+                    </form>
+
+                </div>
+            </div>
+        </div>
+    </div>
+    <AppConfig simple />
+</template>
+
+<style scoped>
+.pi-eye {
+    transform: scale(1.6);
+    margin-right: 1rem;
+}
+
+.pi-eye-slash {
+    transform: scale(1.6);
+    margin-right: 1rem;
+}
+</style>
