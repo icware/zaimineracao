@@ -33,7 +33,15 @@ const routes = [
         meta: {
           title: "Áreas",
         },
-        component: () => import("@/views/company/CompanyList.vue"),
+        component: () => import("@/views/company/CompanyAreas.vue"),
+      },
+      {
+        path: "/company/areas/config",
+        name: "companyConfigAreas",
+        meta: {
+          title: "Áreas",
+        },
+        component: () => import("@/views/company/CompanyConfigArea.vue"),
       },
     ],
   },
