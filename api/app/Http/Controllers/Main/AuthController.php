@@ -79,53 +79,56 @@ class AuthController extends Controller {
     public function get_token(Request $request) {
         try {
             // Lógica para obter um token de acesso
-        
-            $dataRequest = $request->only(['email', 'password']);
-           
-            $pass = base64_decode($dataRequest['password']);
             
+            $dataRequest = $request->only(['email', 'password']);
+               
+            $pass = base64_decode($dataRequest['password']);
             $email = base64_decode($dataRequest['email']);
             
             $user = User::where('email', $email)->first();
-
+    
             if (!$user) {
                 return response()->json(['error' => 'Credenciais inválidas'], Response::HTTP_UNAUTHORIZED);
             }
-
+    
             // Verifique se o usuário está ativo
             if (!$user->active) {
                 return response()->json(['error' => 'Usuário não está ativo'], Response::HTTP_UNAUTHORIZED);
             }
-
+    
             $credentials = [
                 'email' => $email,
                 'password' => $pass
             ];
-           
+            
             // Verifique se as credenciais são válidas
             if (!Auth::validate($credentials)) {
                 return response()->json(['error' => 'Credenciais inválidas'], Response::HTTP_UNAUTHORIZED);
             }
-      
-        
+    
             // Tente gerar o token JWT
             if (!$token = auth('api')->attempt($credentials)) {
                 return response()->json(['error' => 'Falha ao tentar se autenticar'], Response::HTTP_BAD_REQUEST);
             }
-        
+            
             // Informações adicionais para o token
             $additionalData = [
-                'user' => $user
+                'companies' => $user->associates->map(function ($associate) {
+                    return [
+                        'code' => $associate->company->code, // Assumindo que há uma relação 'company' em Associate
+                        'role' => $associate->role,
+                    ];
+                }),
             ];
-        
+            
             // Adicione as informações adicionais ao token
             $tokenWithAdditionalData = auth('api')->claims($additionalData)->attempt($credentials);
-        
-            return $this->respondWithToken($tokenWithAdditionalData, $additionalData);
+            
+            return $this->respondWithToken($tokenWithAdditionalData);
         } catch (\Throwable $th) {
-            return response()->json(['message' => 'Erro interno do servidor', 'error'=> $th->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);}
+            return response()->json(['message' => 'Erro interno do servidor', 'error'=> $th->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
     }
-
     public function update_password(Request $request) {
         // Função para atualizar senha do usuário
         try {
@@ -169,10 +172,9 @@ class AuthController extends Controller {
         }}
 
 
-    protected function respondWithToken($token, $additionalData) {
+    protected function respondWithToken($token) {
         return response()->json([
                     'token' => $token,
-                    'data' => $additionalData,
                     'type' => 'bearer',
                         ], Response::HTTP_OK);
     }
