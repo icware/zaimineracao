@@ -14,25 +14,22 @@ export class apiUrls {
         this.address = address;
         this.point = point;
         this.version = version;
-        this.base =`${this.address}/${this.point}`;
     }
 
     api(urls) {
-        if (this.version) {
-            return `${this.base}/${this.version}/${urls}`;
+        let baseUrl = null;
+
+        if(this.point && this.version) {
+            baseUrl = `${this.address}/${this.point}/${this.version}/${urls}`;
+        } else if(this.point && !this.version) {
+            baseUrl = `${this.address}/${this.point}/${urls}`;
         } else {
-            return `${this.base}/${urls}`;
+            baseUrl = `${this.address}/${urls}`
         }
+       
+        return baseUrl;
     }
 
-    main(url) {
-        return `${this.base}/${url}`;
-    }
-
-    auth(point = null){
-        const url = point || '';
-        return `${this.base}/auth/${url}`;
-    }
 
     company(company) {
         if (company) {

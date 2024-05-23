@@ -50,7 +50,7 @@ class CompanyMigrations extends Migration
             $table->string('source_key');
             $table->string('source_format');
             $table->boolean('visible')->default(false);
-            $table->json('settings')->default(json_encode([]));
+            $table->json('settings')->nullable(true);
             $table->timestamps();
         });
     }
