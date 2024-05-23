@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Validation\ValidationException;
+use Illuminate\Support\Facades\Validator;
 
 class AuthController extends Controller {
 
@@ -76,16 +77,13 @@ class AuthController extends Controller {
         }
     }
 
-    public function get_token(Request $request) {
+    public function getToken(Request $request) {
         try {
             // Lógica para obter um token de acesso
             
-            $dataRequest = $request->only(['email', 'password']);
-               
-            $pass = base64_decode($dataRequest['password']);
-            $email = base64_decode($dataRequest['email']);
-            
-            $user = User::where('email', $email)->first();
+            $credentials = $request->only(['email', 'password']);
+                           
+            $user = User::where('email', $credentials['email'])->first();
     
             if (!$user) {
                 return response()->json(['error' => 'Credenciais inválidas'], Response::HTTP_UNAUTHORIZED);
@@ -95,11 +93,7 @@ class AuthController extends Controller {
             if (!$user->active) {
                 return response()->json(['error' => 'Usuário não está ativo'], Response::HTTP_UNAUTHORIZED);
             }
-    
-            $credentials = [
-                'email' => $email,
-                'password' => $pass
-            ];
+
             
             // Verifique se as credenciais são válidas
             if (!Auth::validate($credentials)) {
@@ -129,6 +123,55 @@ class AuthController extends Controller {
             return response()->json(['message' => 'Erro interno do servidor', 'error'=> $th->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
+
+
+    public function getAdmintoken(Request $request) {
+        try {
+            // Lógica para obter um token de acesso para administrador
+            
+            $credentials = $request->only(['email', 'password']);
+                           
+            $user = User::where('email', $credentials['email'])->first();
+    
+            if (!$user) {
+                return response()->json(['error' => 'Credenciais inválidas'], Response::HTTP_UNAUTHORIZED);
+            }
+    
+            // Verifique se o usuário está ativo
+            if (!$user->active && !$user->super ) {
+                return response()->json(['error' => 'Usuário não está autorizado'], Response::HTTP_UNAUTHORIZED);
+            }
+            
+            // Verifique se as credenciais são válidas
+            if (!Auth::validate($credentials)) {
+                return response()->json(['error' => 'Credenciais inválidas'], Response::HTTP_UNAUTHORIZED);
+            }
+    
+            // Tente gerar o token JWT
+            if (!$token = auth('api')->attempt($credentials)) {
+                return response()->json(['error' => 'Falha ao tentar se autenticar'], Response::HTTP_BAD_REQUEST);
+            }
+            
+            // Informações adicionais para o token
+            $additionalData = [
+                'companies' => $user->associates->map(function ($associate) {
+                    return [
+                        'code' => $associate->company->code, // Assumindo que há uma relação 'company' em Associate
+                        'role' => $associate->role,
+                    ];
+                }),
+            ];
+            
+            // Adicione as informações adicionais ao token
+            $tokenWithAdditionalData = auth('api')->claims($additionalData)->attempt($credentials);
+            
+            return $this->respondWithToken($tokenWithAdditionalData);
+        } catch (\Throwable $th) {
+            return response()->json(['message' => 'Erro interno do servidor', 'error'=> $th->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+
     public function update_password(Request $request) {
         // Função para atualizar senha do usuário
         try {

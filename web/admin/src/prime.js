@@ -104,8 +104,6 @@ import VirtualScroller from 'primevue/virtualscroller';
 
 import BlockViewer from '@/components/BlockViewer.vue';
 
-import '@/assets/styles.scss';
-
 export default function registerPrimeVue(app) {
     app.use(PrimeVue, { ripple: true });
     app.use(ToastService);

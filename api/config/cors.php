@@ -19,7 +19,7 @@ return [
 
     // 'allowed_methods' => ['GET', 'POST','PUT', 'OPTIONS', 'PATCH'],
 
-    'allowed_origins' => ['zaimineracao.com.br','web.zaimineracao.com.br'],
+    // 'allowed_origins' => ['zaimineracao.com.br','web.zaimineracao.com.br','localhost:5173'],
 
     // 'allowed_origins_patterns' => [],
 

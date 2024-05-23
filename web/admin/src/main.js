@@ -5,6 +5,8 @@ import { createPinia } from 'pinia';
 import registerPrimeVue from './prime';
 import checkAuth from './auth';
 
+import '@/assets/styles.scss';
+
 const app = createApp(App);
 
 app.use(router);
