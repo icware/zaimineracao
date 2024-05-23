@@ -43,6 +43,14 @@ const routes = [
         },
         component: () => import("@/views/company/CompanyConfigArea.vue"),
       },
+      {
+        path: "/company/areas/users",
+        name: "companyAreasUsers",
+        meta: {
+          title: "Áreas",
+        },
+        component: () => import("@/views/company/CompanyListUsers.vue"),
+      },
     ],
   },
   ...AuthRouters,
