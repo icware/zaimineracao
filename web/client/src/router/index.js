@@ -28,10 +28,26 @@ const routes = [
         component: () => import("@/views/company/CompanyList.vue"),
       },
       {
+        path: "/company/areas/users",
+        name: "companyAreasUsers",
+        meta: {
+          title: "Company | Users",
+        },
+        component: () => import("@/views/company/CompanyListUsers.vue"),
+      },
+      {
+        path: "/company/config",
+        name: "companyConfig",
+        meta: {
+          title: "Company | Settings",
+        },
+        component: () => import("@/views/company/CompanyConfig.vue"),
+      },
+      {
         path: "/company/areas",
         name: "companyAreas",
         meta: {
-          title: "Áreas",
+          title: "Company | Áreas",
         },
         component: () => import("@/views/company/CompanyAreas.vue"),
       },
@@ -39,17 +55,9 @@ const routes = [
         path: "/company/areas/config",
         name: "companyConfigAreas",
         meta: {
-          title: "Áreas",
+          title: "Áreas | Settings",
         },
         component: () => import("@/views/company/CompanyConfigArea.vue"),
-      },
-      {
-        path: "/company/areas/users",
-        name: "companyAreasUsers",
-        meta: {
-          title: "Áreas",
-        },
-        component: () => import("@/views/company/CompanyListUsers.vue"),
       },
     ],
   },
