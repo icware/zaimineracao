@@ -1,5 +1,5 @@
 import axios from "axios";
-import { apiAddrres } from "@/config";
+import { apiSettgins } from "@/config";
 import { useAuthStore } from '@/store/AuthStore';
 
 
@@ -10,21 +10,19 @@ const defaultHeaders = {
 
 export class apiUrls {
     
-    constructor( address=apiAddrres.address, point=apiAddrres.base, version=apiAddrres.version ) {
-        this.address = address;
-        this.point = point;
-        this.version = version;
+    constructor( Settgins=apiSettgins) {
+        this.settings = Settgins;
     }
 
     api(urls) {
         let baseUrl = null;
 
-        if(this.point && this.version) {
-            baseUrl = `${this.address}/${this.point}/${this.version}/${urls}`;
-        } else if(this.point && !this.version) {
-            baseUrl = `${this.address}/${this.point}/${urls}`;
+        if(this.settings.point && this.settings.version) {
+            baseUrl = `${this.settings.address}/${this.settings.point}/${this.settings.version}/${urls}`;
+        } else if(this.settings.point && !this.settings.version) {
+            baseUrl = `${this.settings.address}/${this.settings.point}/${urls}`;
         } else {
-            baseUrl = `${this.address}/${urls}`
+            baseUrl = `${this.settings.address}/${urls}`
         }
        
         return baseUrl;
@@ -79,7 +77,8 @@ export class ApiError extends Error {
 
 
 export class apiRequest{
-    constructor() {  
+    constructor(Settgins=apiSettgins) {  
+        this.settings = Settgins
         this.axios = axios.create({
             headers:defaultHeaders
         });
@@ -89,7 +88,7 @@ export class apiRequest{
                 const auth = useAuthStore()            
                 const token = auth.getToken
                 if (token) {
-                    requestConfig.headers["Authorization"] = `token ${token}`;
+                    requestConfig.headers["Authorization"] = `${this.settings.type.token} ${token}`;
                 }
                 return requestConfig;
             },

@@ -14,14 +14,17 @@ use Illuminate\Support\Facades\Crypt;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facades\Validator;
 
-class AuthController extends Controller {
+class AuthController extends Controller
+{
 
-    public function show() {
+    public function show()
+    {
         $user = JWTAuth::parseToken()->authenticate();
         return response()->json($user, Response::HTTP_OK);
     }
 
-    public function store(Request $request) {
+    public function store(Request $request)
+    {
         try {
             $request->validate([
                 'first_name' => 'required|string|max:255',
@@ -32,18 +35,18 @@ class AuthController extends Controller {
             ]);
 
             $user = User::create([
-                        'first_name' => $request->first_name,
-                        'last_name' => $request->last_name,
-                        'email' => $request->email,
-                        'password' => Hash::make($request->password),
-                        'phone' => $request->phone,
-                        'active' => true,
-                        'super' => false,
+                'first_name' => $request->first_name,
+                'last_name' => $request->last_name,
+                'email' => $request->email,
+                'password' => Hash::make($request->password),
+                'phone' => $request->phone,
+                'active' => true,
+                'super' => false,
             ]);
 
             // Mail::to($user->email)->send(new WelcomeEmail($user));
 
-            return response()->json(['succes' => 'Usuário cadastrado com sucesso', 'user' => $user], Response::HTTP_CREATED );
+            return response()->json(['succes' => 'Usuário cadastrado com sucesso', 'user' => $user], Response::HTTP_CREATED);
         } catch (ValidationException $e) {
             return response()->json(['error' => 'Erro ao registrar usuário'], Response::HTTP_UNPROCESSABLE_ENTITY);
         } catch (\Exception $e) {
@@ -51,7 +54,8 @@ class AuthController extends Controller {
         }
     }
 
-    public function update(Request $request) {
+    public function update(Request $request)
+    {
         // Função para atualizar o usuário logado
 
         try {
@@ -59,7 +63,7 @@ class AuthController extends Controller {
             $validatedData = $request->validate([
                 'name' => 'string|max:255',
                 'email' => 'email|unique:users,email,' . auth()->id(),
-                    // Adicione aqui outras regras de validação para outros campos, se necessário
+                // Adicione aqui outras regras de validação para outros campos, se necessário
             ]);
 
             // Identificar o usuário logado usando JWT
@@ -77,34 +81,35 @@ class AuthController extends Controller {
         }
     }
 
-    public function getToken(Request $request) {
+    public function getToken(Request $request)
+    {
         try {
             // Lógica para obter um token de acesso
-            
+
             $credentials = $request->only(['email', 'password']);
-                           
+
             $user = User::where('email', $credentials['email'])->first();
-    
+
             if (!$user) {
                 return response()->json(['error' => 'Credenciais inválidas'], Response::HTTP_UNAUTHORIZED);
             }
-    
+
             // Verifique se o usuário está ativo
             if (!$user->active) {
                 return response()->json(['error' => 'Usuário não está ativo'], Response::HTTP_UNAUTHORIZED);
             }
 
-            
+
             // Verifique se as credenciais são válidas
             if (!Auth::validate($credentials)) {
                 return response()->json(['error' => 'Credenciais inválidas'], Response::HTTP_UNAUTHORIZED);
             }
-    
+
             // Tente gerar o token JWT
             if (!$token = auth('api')->attempt($credentials)) {
                 return response()->json(['error' => 'Falha ao tentar se autenticar'], Response::HTTP_BAD_REQUEST);
             }
-            
+
             // Informações adicionais para o token
             $additionalData = [
                 'companies' => $user->associates->map(function ($associate) {
@@ -114,65 +119,64 @@ class AuthController extends Controller {
                     ];
                 }),
             ];
-            
+
             // Adicione as informações adicionais ao token
             $tokenWithAdditionalData = auth('api')->claims($additionalData)->attempt($credentials);
-            
+
             return $this->respondWithToken($tokenWithAdditionalData);
         } catch (\Throwable $th) {
-            return response()->json(['message' => 'Erro interno do servidor', 'error'=> $th->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
+            return response()->json(['message' => 'Erro interno do servidor', 'error' => $th->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 
 
-    public function getAdmintoken(Request $request) {
+    public function getAdmintoken(Request $request)
+    {
         try {
             // Lógica para obter um token de acesso para administrador
-            
+
             $credentials = $request->only(['email', 'password']);
-                           
+
             $user = User::where('email', $credentials['email'])->first();
-    
+
             if (!$user) {
                 return response()->json(['error' => 'Credenciais inválidas'], Response::HTTP_UNAUTHORIZED);
             }
-    
+
             // Verifique se o usuário está ativo
-            if (!$user->active && !$user->super ) {
-                return response()->json(['error' => 'Usuário não está autorizado'], Response::HTTP_UNAUTHORIZED);
+            if (!$user->active && !$user->super) {
+                return response()->json(['error' => 'Usuário não está autorizado 2'], Response::HTTP_UNAUTHORIZED);
             }
-            
+
             // Verifique se as credenciais são válidas
             if (!Auth::validate($credentials)) {
                 return response()->json(['error' => 'Credenciais inválidas'], Response::HTTP_UNAUTHORIZED);
             }
-    
-            // Tente gerar o token JWT
+
             if (!$token = auth('api')->attempt($credentials)) {
                 return response()->json(['error' => 'Falha ao tentar se autenticar'], Response::HTTP_BAD_REQUEST);
             }
-            
-            // Informações adicionais para o token
+
             $additionalData = [
                 'companies' => $user->associates->map(function ($associate) {
                     return [
-                        'code' => $associate->company->code, // Assumindo que há uma relação 'company' em Associate
+                        'code' => $associate->company->code,
                         'role' => $associate->role,
                     ];
                 }),
             ];
-            
-            // Adicione as informações adicionais ao token
+
             $tokenWithAdditionalData = auth('api')->claims($additionalData)->attempt($credentials);
-            
+
             return $this->respondWithToken($tokenWithAdditionalData);
         } catch (\Throwable $th) {
-            return response()->json(['message' => 'Erro interno do servidor', 'error'=> $th->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
+            return response()->json(['message' => 'Erro interno do servidor', 'error' => $th->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 
 
-    public function update_password(Request $request) {
+    public function update_password(Request $request)
+    {
         // Função para atualizar senha do usuário
         try {
             // Validar os dados recebidos
@@ -202,24 +206,36 @@ class AuthController extends Controller {
         }
     }
 
-    public function reset_password(Request $request) {
+    public function reset_password(Request $request)
+    {
         // Função para resetar senha do usuário
     }
 
-    public function check_token(Request $request){
+    public function checkToken(Request $request)
+    {
         try {
             $user = JWTAuth::parseToken()->authenticate();
-            return response()->json( $user, 200);
+            return response()->json($user, 200);
         } catch (\Throwable $th) {
-            return response()->json(['message' => 'Erro interno do servidor', 'error'=> $th->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
-        }}
-
-
-    protected function respondWithToken($token) {
-        return response()->json([
-                    'token' => $token,
-                    'type' => 'bearer',
-                        ], Response::HTTP_OK);
+            return response()->json(['message' => 'Erro interno do servidor', 'error' => $th->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
     }
 
+    public function checkAdminToken(Request $request)
+    {
+        try {
+            $user = JWTAuth::parseToken()->authenticate();
+            return response()->json($user, 200);
+        } catch (\Throwable $th) {
+            return response()->json(['message' => 'Erro interno do servidor', 'error' => $th->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    protected function respondWithToken($token)
+    {
+        return response()->json([
+            'token' => $token,
+            'type' => 'bearer',
+        ], Response::HTTP_OK);
+    }
 }

@@ -9,17 +9,11 @@ export const useAuthStore = defineStore('auth', () => {
     const user = ref(useStoreService.getJson('user'));
     const isAuth = ref(false);
 
-    function setData(response){
-      authLogout();
-      setToken(response.token);
-      setUser(response.user);
-      setIsAuth(true);
-    }
-
     function setToken(value) {
         if (value) {
          useStoreService.setValue('token', value);    
          token.value = value;
+         setIsAuth(true);
         } else {
           console.log('Token não foi salvo');
         }
@@ -49,6 +43,7 @@ export const useAuthStore = defineStore('auth', () => {
         user.value = null;
         isAuth.value = false;
         window.location.href = '/login';
+        console.log('Logout')
       }
 
 
@@ -68,9 +63,8 @@ export const useAuthStore = defineStore('auth', () => {
       );
 
       return {
-        setData,
         setToken,
-        setUser,  
+        setUser,
         setIsAuth,
         authLogout,
         getToken,

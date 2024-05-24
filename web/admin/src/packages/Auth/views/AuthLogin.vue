@@ -57,8 +57,8 @@ async function login() {
     }
     try {
         const response = await authService.login(data);
-        auth.setData(response.data);
-        window.location.href = "/";
+        auth.setToken(response.data.token);
+        window.location.href = "/dashboard";
     } catch (error) {
         showError('Falha', error.message);
     }
@@ -67,7 +67,7 @@ async function login() {
 
 onMounted(() => {
     if (auth.getIsAuth) {
-        window.location.href = "/";
+        window.location.href = "/dashboard";
     }
 })
 

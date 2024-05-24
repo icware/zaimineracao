@@ -2,13 +2,17 @@ import { createRouter, createWebHistory } from "vue-router";
 import { useAuthStore } from "../store/AuthStore";
 import AuthRouters from "@/packages/Auth/routes";
 import AppLayout from "@/layout/AppLayout.vue";
+import routesToservers from "@/packages/server/routes";
+import routesToUsers from "@/packages/user/routes";
+import routesToCompanies from "@/packages/company/routes";
+// import routeService from "@/packages/service/RoutesService";
 
 const routes = [
   {
     path: "/",
     component: AppLayout,
     meta: {
-      title: "Zai Mineração",
+      title: "Admin Zai",
     },
     children: [
       {
@@ -19,30 +23,10 @@ const routes = [
         },
         component: () => import("@/views/DashboardView.vue"),
       },
-      {
-        path: "/companies",
-        name: "companies",
-        meta: {
-          title: "Unidades",
-        },
-        component: () => import("@/views/company/CompanyList.vue"),
-      },
-      {
-        path: "/company/areas",
-        name: "companyAreas",
-        meta: {
-          title: "Áreas",
-        },
-        component: () => import("@/views/company/CompanyAreas.vue"),
-      },
-      {
-        path: "/company/areas/config",
-        name: "companyConfigAreas",
-        meta: {
-          title: "Áreas",
-        },
-        component: () => import("@/views/company/CompanyConfigArea.vue"),
-      },
+      ...routesToservers,
+      ...routesToUsers,
+      ...routesToCompanies,
+      // ...routeService,  
     ],
   },
   ...AuthRouters,

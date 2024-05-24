@@ -5,17 +5,26 @@ import AppMenuItem from './AppMenuItem.vue';
 
 const model = ref([
     {
-        label: 'Home',
+        label: 'Dashboard',
         items: [{ label: 'Dashboard', icon: 'pi pi-fw pi-home', to: '/dashboard' }]
     },
     {
-        label: 'Usuário',
+        label: 'Sistema',
         items: [
-            { label: 'Unidades', icon: 'pi pi-fw pi-home', to: '/companies' },
-            { label: 'Áreas', icon: 'pi pi-fw pi-home', to: '/company/areas' }
+            { label: 'Servidores', icon: 'pi pi-fw pi-server', to: '/servers' },
+            { label: 'Serviços', icon: 'pi pi-fw pi-cog', to: '/' },
+
         ]
 
-    }
+    },
+    {
+        label: 'Cliente',
+        items: [
+            { label: 'Usuários', icon: 'pi pi-fw pi-users', to: '/users' },
+            { label: 'Empresas', icon: 'pi pi-fw pi-building', to: '/companies' },
+        ]
+
+    },
 
 ]);
 </script>

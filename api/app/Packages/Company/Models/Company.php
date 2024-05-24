@@ -15,7 +15,27 @@ class Company extends Model
     protected $table = 'companies';
 
     // Defina os campos que podem ser preenchidos em massa (opcional)
-    protected $fillable = ['name','code', 'cnpj', 'client','status'];
+    protected $fillable = [
+        'name', // Company name
+        'code', // Unique company code
+        'cnpj', // Unique CNPJ of the company
+        'responsible_cpf', // CPF of the responsible person
+        'company_name', // Official company name (Razão Social)
+        'address_type', // Type of address (Tipo Logradouro)
+        'address', // Street address (Logradouro)
+        'number', // Address number (Número)
+        'complement', // Address complement (Complemento)
+        'neighborhood', // Neighborhood (Bairro)
+        'postal_code', // Postal code (CEP)
+        'state', // State (Estado)
+        'country', // Country (País)
+        'phone', // Contact phone number (Telefone)
+        'email', // Contact email (Email)
+        'trading_name', // Trading name (Nome Fantasia)
+        'registration_status', // Registration status (Situação Cadastral)
+        'client', // Client name
+        'status' // Company status (active/inactive)
+    ];
 
     // Defina os campos que devem ser ocultos ao serializar o modelo para JSON (opcional)
     protected $hidden = [];
@@ -30,15 +50,15 @@ class Company extends Model
         return $this->hasMany(Associate::class);
     }
 
-         // Relacionamento belongsToMany com User
+    // Relacionamento belongsToMany com User
     public function users()
     {
         return $this->belongsToMany(User::class, 'associates')->withPivot('role', 'enabled');
-
     }
 
-     // Relacionamento hasMany com Display
-     public function displays()     {
-         return $this->hasMany(Display::class);
-     }
+    // Relacionamento hasMany com Display
+    public function displays()
+    {
+        return $this->hasMany(Display::class);
+    }
 }

@@ -13,6 +13,7 @@ export default function checkAuth() {
             } catch (error) {
                 auth.setIsAuth(false);
                 auth.authLogout();
+                console.log(error.message);
             }
     
         } ) ()
