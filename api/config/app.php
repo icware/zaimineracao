@@ -70,7 +70,8 @@ return [
     |
     */
 
-    'timezone' => 'America/Sao_paulo',
+    'timezone' => env('TIMEZONE', 'America/Sao_paulo'),
+    // 'timezone' => 'UTC',
 
     /*
     |--------------------------------------------------------------------------

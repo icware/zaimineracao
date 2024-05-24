@@ -24,7 +24,7 @@ class EmailVerificationController extends Controller
 
     public function verifyEmail(Request $request)
     {
-        $user = JWTAuth::parseToken()->authenticate();
+        $user = User::findOrFail($request->code);
 
         if ($request->hasValidSignature()) {
             $user->email_verified_at = now();
@@ -40,8 +40,8 @@ class EmailVerificationController extends Controller
     {
         return URL::temporarySignedRoute(
             'email.verify',
-            now()->addMinutes(360),
-            ['user_id' => $user->id]
+            now()->addMinutes(60),
+            ['code' => $user->id]
         );
     }
 

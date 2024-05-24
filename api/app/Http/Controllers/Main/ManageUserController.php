@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Validation\ValidationException;
 use App\Packages\System\Controllers\SystemCodeController;
+use Illuminate\Support\Facades\URL;
 
 class ManageUserController extends Controller
 {
@@ -35,7 +36,7 @@ class ManageUserController extends Controller
                 'phone' => 'required|string|max:30',
             ]);
 
-            $newCode = $this->systemCode->generateCode('reset_password');
+            $newCode = $this->systemCode->generateCode('system_user');
 
             $user = User::create([
                 'first_name' => $request->first_name,
@@ -50,6 +51,10 @@ class ManageUserController extends Controller
             ]);
 
             $this->sendWelcomeEmail($user);
+
+            $verificationUrl = $this->verificationUrl($user);
+
+            $this->sendVerificationEmail($user, $verificationUrl);
 
             return response()->json(['success' => 'Usuário cadastrado com sucesso', 'user' => $user], 201);
         } catch (ValidationException $e) {
@@ -92,7 +97,7 @@ class ManageUserController extends Controller
         return response()->json(['status' => 'success']);
     }
 
-    public function get_reset_password(Request $request)
+    public function reset_password(Request $request)
     {
         try {
             $request->validate([
@@ -122,7 +127,7 @@ class ManageUserController extends Controller
         }
     }
 
-    public function set_reset_password(Request $request)
+    public function new_password(Request $request)
     {
         try {
             $request->validate([
@@ -238,6 +243,24 @@ class ManageUserController extends Controller
                 'message' => 'Erro ao enviar e-mail de boas-vindas para o usuário ' . $user->email . ': ' . $e->getMessage(),
             ]);
         }
+    }
+
+    protected function verificationUrl($user)
+    {
+        return URL::temporarySignedRoute(
+            'email.verify',
+            now()->addMinutes(60),
+            ['code' => $user->id]
+        );
+    }
+
+    protected function sendVerificationEmail($user, $verificationUrl)
+    {
+        Mail::send('emails.verify', ['user' => $user, 'verificationUrl' => $verificationUrl], function ($message) use ($user) {
+            $message->to($user->email, $user->name)
+                ->subject('Verifique seu endereço de e-mail');
+        });
+
     }
 
 }
