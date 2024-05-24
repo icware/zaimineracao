@@ -24,9 +24,9 @@ class MainController extends Controller
                 'date' => $formattedDate,
                 'time' => $formattedTime,
                 'version' => $serverVersion,
-            ], Response::HTTP_OK);
+            ], 200);
         } else {
-            return response()->json(['status' => 'Server is down'], Response::HTTP_SERVICE_UNAVAILABLE);
+            return response()->json(['status' => 'Server is down'], 500);
         }
     }
 }

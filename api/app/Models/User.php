@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Laravel\Sanctum\HasApiTokens;
 use Tymon\JWTAuth\Contracts\JWTSubject;
 use App\Packages\Company\Models\Company;
@@ -10,6 +9,7 @@ use Illuminate\Notifications\Notifiable;
 use App\Packages\Company\Models\Associate;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+
 
 class User extends Authenticatable implements JWTSubject
 {
@@ -29,6 +29,7 @@ class User extends Authenticatable implements JWTSubject
         'active',
         'company',
         'super',
+        'code',
         'birth',
         'reset_password_code'
     ];
@@ -41,7 +42,7 @@ class User extends Authenticatable implements JWTSubject
     protected $hidden = [
         'password',
         'remember_token',
-        'reset_password_code',        
+        'reset_password_code',
     ];
 
     /**
@@ -78,4 +79,5 @@ class User extends Authenticatable implements JWTSubject
         return $this->belongsToMany(Company::class, 'associates')->withPivot('role', 'enabled');
 
     }
+
 }

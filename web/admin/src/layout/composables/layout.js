@@ -1,15 +1,29 @@
-import { toRefs, reactive, computed } from 'vue';
+import { toRefs, reactive, computed, watch } from 'vue';
 
 
-const layoutConfig = reactive({
+// Carregar configuração do localStorage ou usar padrão
+const savedLayoutConfig = JSON.parse(localStorage.getItem('layoutConfig')) || {
     ripple: true,
     darkTheme: true,
     inputStyle: 'outlined',
     menuMode: 'static',
-    theme: 'aura-dark-gree',
+    theme: 'aura-dark-green',
     scale: 12,
     activeMenuItem: null,
-});
+};
+
+// const layoutConfig = reactive({
+//     ripple: true,
+//     darkTheme: true,
+//     inputStyle: 'outlined',
+//     menuMode: 'static',
+//     theme: 'aura-dark-gree',
+//     scale: 12,
+//     activeMenuItem: null,
+// });
+
+
+const layoutConfig = reactive(savedLayoutConfig);
 
 const layoutState = reactive({
     staticMenuDesktopInactive: false,
@@ -19,6 +33,11 @@ const layoutState = reactive({
     staticMenuMobileActive: false,
     menuHoverActive: false
 });
+
+// Salvar layoutConfig no localStorage sempre que mudar
+watch(layoutConfig, (newConfig) => {
+    localStorage.setItem('layoutConfig', JSON.stringify(newConfig));
+}, { deep: true });
 
 export function useLayout() {
     const setScale = (scale) => {

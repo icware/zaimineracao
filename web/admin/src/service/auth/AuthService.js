@@ -8,7 +8,7 @@ export class AuthService {
 
   async login(data) {
     try {
-      const url = this.url.api('auth/admin/token');
+      const url = this.url.api('auth/login');
       return await this.api.execute("post", url, data);
     } catch (error) {
       ApiError.handleError(error);
@@ -17,7 +17,7 @@ export class AuthService {
 
   async register(data) {
     try {
-      const url = this.url.auth("register/");
+      const url = this.url.auth("auth");
       return await this.api.execute("post", url, data);
     } catch (error) {
       ApiError.handleError(error);

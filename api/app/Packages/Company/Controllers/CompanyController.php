@@ -19,74 +19,11 @@ class CompanyController extends Controller
         $this->systemCode = $systemCodeController;
     }
 
-
-    /**
-     * Get list of companies.
-     *
-     * @group Companies
-     * @response 200 [
-     *   {
-     *     "id": 1,
-     *     "name": "Company One",
-     *     "code": "COMP1",
-     *     "client": "Client One",
-     *     "cnpj": "12345678000100",
-     *     "responsible_cpf": "12345678901",
-     *     "company_name": "Company One Ltd.",
-     *     "address_type": "Street",
-     *     "address": "123 Main St",
-     *     "number": "100",
-     *     "complement": "Suite 200",
-     *     "neighborhood": "Downtown",
-     *     "postal_code": "12345-678",
-     *     "state": "SP",
-     *     "country": "Brazil",
-     *     "phone": "+55 11 98765-4321",
-     *     "email": "contact@companyone.com",
-     *     "trading_name": "Company One",
-     *     "registration_status": "Active",
-     *     "status": true,
-     *   }
-     * ]
-     */
-
     public function index()
     {
         $object = Company::all();
         return CompanyResource::collection($object);
     }
-
-    /**
-     * Get a specific company.
-     *
-     * @group Companies
-     * @urlParam id required The ID of the company. Example: 1
-     * @response 200 {
-     *   "id": 1,
-     *   "name": "Company One",
-     *   "code": "COMP1",
-     *   "client": "Client One",
-     *   "cnpj": "12345678000100",
-     *   "responsible_cpf": "12345678901",
-     *   "company_name": "Company One Ltd.",
-     *   "address_type": "Street",
-     *   "address": "123 Main St",
-     *   "number": "100",
-     *   "complement": "Suite 200",
-     *   "neighborhood": "Downtown",
-     *   "postal_code": "12345-678",
-     *   "state": "SP",
-     *   "country": "Brazil",
-     *   "phone": "+55 11 98765-4321",
-     *   "email": "contact@companyone.com",
-     *   "trading_name": "Company One",
-     *   "registration_status": "Active",
-     *   "status": true,
-     * }
-     * @response 404 {
-     *   "message": "No query results for model [App\\Models\\Company] 1"
-     * }
-     */
 
     public function show(Company $company)
     {

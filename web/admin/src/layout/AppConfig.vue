@@ -40,7 +40,13 @@ const onChangeTheme = (theme, mode) => {
     $primevue.changeTheme(layoutConfig.theme.value, theme, 'theme-css', () => {
         layoutConfig.theme.value = theme;
         layoutConfig.darkTheme.value = mode;
+        localStorage.setItem('layoutConfig', JSON.stringify(layoutConfig));
     });
+
+    const themeLink = document.getElementById('theme-css');
+    if (themeLink) {
+        themeLink.href = `/themes/${newTheme}/theme.css`;
+    }
 };
 
 const decrementScale = () => {
@@ -53,12 +59,14 @@ const incrementScale = () => {
 };
 const applyScale = () => {
     document.documentElement.style.fontSize = layoutConfig.scale.value + 'px';
+    localStorage.setItem('layoutConfig', JSON.stringify(layoutConfig));
 };
 // const onInputStyleChange = (value) => {
 //     $primevue.config.inputStyle = value;
 // };
 const onMenuModeChange = (value) => {
     layoutConfig.menuMode.value = value;
+    localStorage.setItem('layoutConfig', JSON.stringify(layoutConfig)); // Adicionado para armazenar no localStorage
 };
 // const onRippleChange = (value) => {
 //     layoutConfig.ripple.value = value;

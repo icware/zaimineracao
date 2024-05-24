@@ -4,8 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class extends Migration {
     /**
      * Run the migrations.
      */
@@ -16,6 +15,7 @@ return new class extends Migration
             $table->string('first_name')->nullable();
             $table->string('last_name')->nullable();
             $table->string('email')->unique();
+            $table->string('code')->unique();
             $table->string('phone')->nullable();
             $table->string('birth')->nullable();
             $table->boolean('active')->default(false);
@@ -27,6 +27,16 @@ return new class extends Migration
             $table->rememberToken();
             $table->timestamps();
         });
+
+        Schema::create('user_layout_configs', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            $table->string('theme')->default('aura-dark-blue');
+            $table->integer('scale')->default(16);
+            $table->boolean('dark_mode')->default(false);
+            $table->string('menu_mode')->default('static');
+            $table->timestamps();
+        });
     }
 
     /**
@@ -34,6 +44,7 @@ return new class extends Migration
      */
     public function down(): void
     {
+        Schema::dropIfExists('user_layout_configs');
         Schema::dropIfExists('users');
     }
 };
