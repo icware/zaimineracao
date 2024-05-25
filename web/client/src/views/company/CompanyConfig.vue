@@ -16,15 +16,16 @@
                     <InputText id="email" v-model="data.email" />
                 </div>
 
+                <!-- Input com botão -->
                 <div class="field col-12 md:col-4">
-                    <label for="directory">Diretório</label>
-                    <InputText id="directory" v-model="data.directory" disabled />
+                    <label for="directory">Arquivo</label>
+                    <div class="p-inputgroup">
+                        <Button label="Selecionar" icon="pi pi-plus" class="p-button-info" @click="openFilePicker" />
+                        <input type="file" id="fileInput" style="display: none" @change="transferirValor" />
+                        <InputText id="directory" v-model="data.directory" readonly placeholder="Diretório" />
+                    </div>
                 </div>
-
-                <div class="field col-12 md:col-4">
-                    <FileUpload mode="basic" name="demo[]" url="/api/upload" accept="image/*" :maxFileSize="1000000"
-                        @upload="onUpload" :auto="true" chooseLabel="Adicionar logo" />
-                </div>
+                <!-- ----------------- -->
 
             </div>
 
@@ -38,27 +39,31 @@
     <Toast />
 </template>
 
-
-
 <script setup>
-import { ref } from 'vue';
 import { useToast } from 'primevue/usetoast';
-import FileUpload from 'primevue/fileupload';
 import Toast from 'primevue/toast';
 
-const data = ref({
-    link: '',
-    email: '',
-    directory: '',
-});
 
 const toast = useToast();
 
-const onUpload = () => {
-    toast.add({ severity: 'info', summary: 'Success', detail: 'File Uploaded', life: 3000 });
+const openFilePicker = () => {
+    const fileInput = document.getElementById('fileInput');
+    fileInput.click();
 };
 
+function transferirValor() {
+    try {
+        const vOrigem = document.getElementById("fileInput").value;
+        document.getElementById("directory").value = vOrigem;
+        toast.add({ severity: 'success', summary: 'Sucesso', detail: 'Arquivo carregado com sucesso!', life: 3000 });
+    } catch {
+        toast.add({ severity: 'error', summary: 'Erro', detail: 'Erro ao carregar arquivo!', life: 3000 });
+    }
+}
+
+
+
 const show = () => {
-    toast.add({ severity: 'info', summary: 'Info', detail: 'Mensagem de informação!', life: 3000 });
+    toast.add({ severity: 'info', summary: 'Info', detail: 'Mensagem de Teste', life: 3000 });
 };
 </script>

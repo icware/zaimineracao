@@ -28,8 +28,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
-import { ProductService } from '@/service/ProductService';
+import { ref } from 'vue';
 
 
 // Falta linkar com o servidor para trazer os dados reais
@@ -39,7 +38,4 @@ const addArea = ref([
 ]
 );
 
-onMounted(async () => {
-    products.value = await ProductService.getProductsMini();
-});
 </script>

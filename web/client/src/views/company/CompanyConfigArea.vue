@@ -34,23 +34,28 @@
                     </div>
                 </div>
             </div>
-            <div class="flex flex-column  gap-2 ml-4">
-                <div class="flex gap-2">
-                    <Checkbox v-model="data.visible" binary variant="filled" />
-                    <label class="md:fs-6 " for="visible">Área Visível</label>
-                </div>
+            <div class="grid flex flex-row justify-content-center gap-4 mt-5">
                 <div class="flex gap-2">
                     <Checkbox v-model="data.active" binary variant="filled" />
                     <label for="active">Ativo</label>
                 </div>
                 <div class="flex gap-2">
+                    <Checkbox v-model="data.visible" binary variant="filled" />
+                    <label class="md:fs-6 " for="visible">Visível</label>
+                </div>
+                <div class="flex gap-2">
                     <Checkbox v-model="data.main" binary variant="filled" />
-                    <label for="main">Área Principal</label>
+                    <label for="main">Principal</label>
                 </div>
                 <div class="flex gap-2">
                     <Checkbox v-model="data.primary" binary variant="filled" />
-                    <label for="primary">Área Primário</label>
+                    <label for="primary">Primário</label>
                 </div>
+            </div>
+
+            <div class="flex flex-wrap gap-2 justify-content-center mt-5 ">
+                <Button label="Salvar" @click="show()" />
+                <Button label="Cancelar" class="p-button-secondary" />
             </div>
 
         </template>
@@ -59,6 +64,10 @@
 
 <script setup>
 import { ref } from 'vue';
+import { useToast } from 'primevue/usetoast';
+
+
+const toast = useToast();
 
 const data = ref({
     name: ref(''),
@@ -71,5 +80,9 @@ const data = ref({
     main: ref(false),
     primary: ref(false),
 });
+
+const show = () => {
+    toast.add({ severity: 'info', summary: 'Info', detail: 'Mensagem de Teste', life: 3000 });
+};
 
 </script>
