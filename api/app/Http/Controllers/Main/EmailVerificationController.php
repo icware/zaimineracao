@@ -2,52 +2,88 @@
 
 namespace App\Http\Controllers\Main;
 
-use App\Models\User;
+use Carbon\Carbon;
+use App\Models\SystemLog;
+use Illuminate\Support\Str;
 use Illuminate\Http\Request;
-use Illuminate\Routing\Controller;
-use Illuminate\Support\Facades\URL;
-use Illuminate\Support\Facades\Mail;
+use App\Models\EmailVerification;
 use Tymon\JWTAuth\Facades\JWTAuth;
+use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Mail;
 
 class EmailVerificationController extends Controller
 {
-    public function generateVerificationUrl(Request $request)
+    public function get_email_verify(Request $request)
     {
-        $user = JWTAuth::parseToken()->authenticate();
+        try {
+            $user = JWTAuth::parseToken()->authenticate();
 
-        $verificationUrl = $this->verificationUrl($user);
+            if ($user) {
+                EmailVerification::where("user_id", $user->id)->delete();
 
-        $this->sendVerificationEmail($user, $verificationUrl);
+                $verificationCode = Str::random(6);
 
-        return response()->json(['verification_url' => $verificationUrl]);
-    }
+                $expiresAt = Carbon::now()->addHour();
 
-    public function verifyEmail(Request $request)
-    {
-        $user = User::findOrFail($request->code);
+                EmailVerification::create([
+                    'user_id' => $user->id,
+                    'verification_code' => $verificationCode,
+                    'expires_at' => $expiresAt
+                ]);
 
-        if ($request->hasValidSignature()) {
-            $user->email_verified_at = now();
-            $user->save();
+                $this->sendVerificationEmail($user, $verificationCode);
 
-            return response()->json(['message' => 'E-mail verificado com sucesso']);
+                return response()->json(['message' => 'Código de verificação enviado.']);
+
+            } else {
+                return response()->json(['message' => 'Usuário não encontrado.'], 404);
+            }
+
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Erro ao processar a solicitação.'], 500);
         }
 
-        return response()->json(['error' => 'Link de verificação inválido ou expirado'], 400);
     }
 
-    protected function verificationUrl($user)
+    public function email_verify(Request $request)
     {
-        return URL::temporarySignedRoute(
-            'email.verify',
-            now()->addMinutes(60),
-            ['code' => $user->id]
-        );
+        $request->validate([
+            'verification_code' => 'required|string',
+        ]);
+
+        $verification = EmailVerification::where('verification_code', $request->verification_code)
+            ->where('expires_at', '>', Carbon::now())
+            ->first();
+
+        if (!$verification) {
+            return response()->json(['message' => 'Invalid or expired verification code.'], 400);
+        }
+
+        $user = $verification->user;
+        $user->email_verified_at = Carbon::now();
+        $user->save();
+
+        $verification->delete();
+
+        try {
+            Mail::send('emails.user_verify', ['user' => $user,], function ($message) use ($user) {
+                $message->to($user->email, $user->first_name . ' ' . $user->last_name)
+                    ->subject('Email verificado');
+            });
+
+        } catch (\Exception $e) {
+            SystemLog::create([
+                'action' => 'email_error_email_verify',
+                'message' => 'Erro ao enviar e-mail' . $user->email . ': ' . $e->getMessage(),
+            ]);
+        }
+
+        return response()->json(['message' => 'Email verified successfully.']);
     }
 
-    protected function sendVerificationEmail($user, $verificationUrl)
+    protected function sendVerificationEmail($user, $verification)
     {
-        Mail::send('emails.verify', ['user' => $user, 'verificationUrl' => $verificationUrl], function ($message) use ($user) {
+        Mail::send('emails.verify', ['user' => $user, 'verification' => $verification], function ($message) use ($user) {
             $message->to($user->email, $user->name)
                 ->subject('Verifique seu endereço de e-mail');
         });

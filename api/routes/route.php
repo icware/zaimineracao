@@ -7,10 +7,10 @@ use App\Http\Controllers\Main\MainController;
 use App\Http\Controllers\Main\EmailVerificationController;
 use App\Http\Controllers\Main\ManageUserController;
 
-Route::get('/', [MainController::class, 'main']);
+Route::get('/', [MainController::class, 'main'])->middleware('auth.jwt');
 
-Route::post('/email/verification-url', [EmailVerificationController::class, 'generateVerificationUrl'])->middleware('auth.jwt');
-Route::get('/email/verify', [EmailVerificationController::class, 'verifyEmail'])->name('email.verify');
+Route::post('/email/verify', [EmailVerificationController::class, 'get_email_verify'])->middleware('auth.jwt');
+Route::post('/email/verify/code', [EmailVerificationController::class, 'email_verify'])->middleware('auth.jwt');
 
 
 Route::prefix('auth')->group(function () {
@@ -27,8 +27,8 @@ Route::prefix('auth')->group(function () {
 
         Route::prefix('password')->group(function () {
             Route::put('update', [ManageUserController::class, 'update_password'])->middleware('auth.jwt');
-            Route::post('reset', [ManageUserController::class, 'reset_password'])->middleware('auth.jwt');
-            Route::post('new', [ManageUserController::class, 'new_password'])->middleware('auth.jwt');
+            Route::post('reset', [ManageUserController::class, 'reset_password']);
+            Route::post('new', [ManageUserController::class, 'new_password']);
         });
     });
 });

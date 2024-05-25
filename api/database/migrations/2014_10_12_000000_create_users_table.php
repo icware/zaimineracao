@@ -22,7 +22,7 @@ return new class extends Migration {
             $table->string('company')->nullable();
             $table->boolean('super')->default(false);
             $table->timestamp('email_verified_at')->nullable();
-            $table->string('reset_password_code')->nullable();
+            $table->timestamp('update_password_at')->nullable();
             $table->string('password');
             $table->rememberToken();
             $table->timestamps();

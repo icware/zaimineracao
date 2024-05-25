@@ -2,9 +2,12 @@
 
 namespace App\Http\Controllers\Main;
 
+use Carbon\Carbon;
 use App\Models\User;
 use App\Models\SystemLog;
+use Illuminate\Support\Str;
 use Illuminate\Http\Request;
+use App\Models\ResetPassword;
 use App\Mail\ResetPasswordMail;
 use App\Models\UserLayoutConfig;
 use Tymon\JWTAuth\Facades\JWTAuth;
@@ -13,7 +16,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Validation\ValidationException;
 use App\Packages\System\Controllers\SystemCodeController;
-use Illuminate\Support\Facades\URL;
+
 
 class ManageUserController extends Controller
 {
@@ -52,10 +55,6 @@ class ManageUserController extends Controller
 
             $this->sendWelcomeEmail($user);
 
-            $verificationUrl = $this->verificationUrl($user);
-
-            $this->sendVerificationEmail($user, $verificationUrl);
-
             return response()->json(['success' => 'Usuário cadastrado com sucesso', 'user' => $user], 201);
         } catch (ValidationException $e) {
             return $this->handleError('Erro ao registrar usuário', 422, $e->getMessage());
@@ -81,6 +80,8 @@ class ManageUserController extends Controller
             $user->fill($validatedData);
             $user->save();
 
+            $this->sendUpdate($user);
+
             return response()->json(['message' => 'Usuário atualizado com sucesso'], 202);
         } catch (\Throwable $th) {
             return $this->handleError('Erro interno do servidor', 500, $th->getMessage());
@@ -100,6 +101,7 @@ class ManageUserController extends Controller
     public function reset_password(Request $request)
     {
         try {
+
             $request->validate([
                 'email' => 'required|email',
                 'phone' => 'required',
@@ -111,12 +113,21 @@ class ManageUserController extends Controller
                 ->where('birth', $request->birth)
                 ->first();
 
-
             if ($user) {
-                $newCode = $this->systemCode->generateCode('reset_password');
-                $user->update(['reset_password_code' => $newCode]);
 
-                Mail::to($user->email)->send(new ResetPasswordMail($newCode));
+                ResetPassword::where('user_id', $user->id)->delete();
+
+                $verificationCode = Str::random(6);
+
+                $expiresAt = Carbon::now()->addHour();
+
+                ResetPassword::create([
+                    'user_id' => $user->id,
+                    'verification_code' => $verificationCode,
+                    'expires_at' => $expiresAt
+                ]);
+
+                Mail::to($user->email)->send(new ResetPasswordMail($verificationCode));
 
                 return response()->json(['message' => 'Código de redefinição de senha enviado com sucesso.']);
             } else {
@@ -131,20 +142,27 @@ class ManageUserController extends Controller
     {
         try {
             $request->validate([
-                'reset_password_code' => 'required',
-                'password' => 'required|min:8',
+                'verification_code' => 'required|string',
+                'new_password' => 'required|min:8',
             ]);
-            $user = User::where('reset_password_code', $request->reset_password_code)->first();
-            if ($user) {
-                $user->update([
-                    'password' => bcrypt($request->password),
-                    'reset_password_code' => null,
-                ]);
 
-                return response()->json(['message' => 'Senha atualizada com sucesso.']);
-            } else {
-                return response()->json(['message' => 'Código de redefinição de senha inválido.'], 404);
+            $verification = ResetPassword::where('verification_code', $request->verification_code)
+                ->where('expires_at', '>', Carbon::now())
+                ->first();
+
+            if (!$verification) {
+                return response()->json(['message' => 'Invalid or expired verification code.'], 400);
             }
+
+            $user = $verification->user;
+            $user->password = bcrypt($request->new_password);
+            $user->update_password_at = Carbon::now();
+            $user->save();
+
+            $this->sendUpdatePass($user);
+
+            return response()->json(['message' => 'Senha atualizada com sucesso.']);
+
         } catch (\Exception $e) {
             return response()->json(['message' => 'Erro ao processar a solicitação.'], 500);
         }
@@ -167,6 +185,8 @@ class ManageUserController extends Controller
 
             $user->password = bcrypt($request->new_password);
             $user->save();
+
+            $this->sendUpdatePass($user);
 
             return response()->json(['message' => 'Senha atualizada com sucesso'], 202);
         } catch (\Throwable $th) {
@@ -206,61 +226,46 @@ class ManageUserController extends Controller
         try {
             Mail::send('emails.welcome', $emailData, function ($message) use ($user) {
                 $message->to($user->email, $user->first_name . ' ' . $user->last_name)
-                    ->subject('Bem-vindo ao nosso sistema');
+                    ->subject('Usuário registrado com sucesso');
             });
-
-            SystemLog::create([
-                'action' => 'welcome_email_sent',
-                'message' => 'E-mail de boas-vindas enviado para o usuário ' . $user->email,
-            ]);
         } catch (\Exception $e) {
             SystemLog::create([
-                'action' => 'welcome_email_error',
-                'message' => 'Erro ao enviar e-mail de boas-vindas para o usuário ' . $user->email . ': ' . $e->getMessage(),
+                'action' => 'email_error_welcome',
+                'message' => 'Erro ao enviar e-mail' . $user->email . ': ' . $e->getMessage(),
             ]);
         }
     }
 
     private function sendUpdate(User $user)
     {
-        $emailData = [
-            'user' => $user,
-        ];
-
         try {
-            Mail::send('emails.update_profile', $emailData, function ($message) use ($user) {
+            Mail::send('emails.update_profile', ['user' => $user,], function ($message) use ($user) {
                 $message->to($user->email, $user->first_name . ' ' . $user->last_name)
                     ->subject('Perfil Atualizado');
             });
 
-            SystemLog::create([
-                'action' => 'welcome_email_sent',
-                'message' => 'E-mail de boas-vindas enviado para o usuário ' . $user->email,
-            ]);
         } catch (\Exception $e) {
             SystemLog::create([
-                'action' => 'welcome_email_error',
-                'message' => 'Erro ao enviar e-mail de boas-vindas para o usuário ' . $user->email . ': ' . $e->getMessage(),
+                'action' => 'email_error_update_profile',
+                'message' => 'Erro ao enviar e-mail' . $user->email . ': ' . $e->getMessage(),
             ]);
         }
     }
 
-    protected function verificationUrl($user)
+    private function sendUpdatePass(User $user)
     {
-        return URL::temporarySignedRoute(
-            'email.verify',
-            now()->addMinutes(60),
-            ['code' => $user->id]
-        );
-    }
+        try {
+            Mail::send('emails.update_profile', ['user' => $user,], function ($message) use ($user) {
+                $message->to($user->email, $user->first_name . ' ' . $user->last_name)
+                    ->subject('Sua senha foi alterada');
+            });
 
-    protected function sendVerificationEmail($user, $verificationUrl)
-    {
-        Mail::send('emails.verify', ['user' => $user, 'verificationUrl' => $verificationUrl], function ($message) use ($user) {
-            $message->to($user->email, $user->name)
-                ->subject('Verifique seu endereço de e-mail');
-        });
-
+        } catch (\Exception $e) {
+            SystemLog::create([
+                'action' => 'email_error_update_profile',
+                'message' => 'Erro ao enviar e-mail' . $user->email . ': ' . $e->getMessage(),
+            ]);
+        }
     }
 
 }

@@ -1,20 +1,14 @@
-<!DOCTYPE html>
-<html>
+@extends('emails.email')
 
-<head>
-    <title>Verificação de E-mail</title>
-</head>
+@section('title', 'Verificação de E-mail')
 
-<body>
-    <p>Olá, {{ $user->first_name }} {{ $user->last_name }}!</p>
-    <p>Obrigado por se registrar em nosso sistema. Para concluir o processo de registro, por favor, verifique seu
-        endereço de e-mail clicando no link abaixo:</p>
-    <p>
-        <a href="{{ $verificationUrl }}">Verificar E-mail</a>
-    </p>
-    <p>Este link é válido por 60 minutos.</p>
-    <p>Se você não criou uma conta, por favor ignore este e-mail.</p>
-    <p>Atenciosamente,<br>Zai Mineração</p>
-</body>
+@section('header', 'Verificação de E-mail')
 
-</html>
+@section('content')
+<p>Olá, {{ $user->first_name }} {{ $user->last_name }}!</p>
+<p>Para concluir o processo de registro, por favor, verifique seu
+    endereço de e-mail usando o código abaixo:</p>
+<p><strong>{{ $verification }}</strong></p>
+<p>Este código é válido por 60 minutos.</p>
+<p>Se você não criou uma conta, por favor ignore este e-mail.</p>
+@endsection

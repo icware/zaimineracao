@@ -1,16 +1,10 @@
-<!DOCTYPE html>
-<html lang="en">
+@extends('emails.email')
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Seu perfil foi atualizado</title>
-</head>
+@section('title', 'Atualização de perfil')
 
-<body>
-    <h1>Bem-vindo ao nosso site!</h1>
-    <p>Obrigado por se registrar. Estamos felizes em tê-lo como parte da nossa comunidade.</p>
-    <p>Se precisar de ajuda, não hesite em nos contatar.</p>
-</body>
+@section('header', 'Atualização de perfil')
 
-</html>
+@section('content')
+<p>Olá, {{ $user->first_name }} {{ $user->last_name }}!</p>
+<p>Seu perfil foi atualizado</p>
+@endsection
