@@ -42,7 +42,6 @@ class User extends Authenticatable implements JWTSubject
     protected $hidden = [
         'password',
         'remember_token',
-        'reset_password_code',
     ];
 
     /**
@@ -52,6 +51,7 @@ class User extends Authenticatable implements JWTSubject
      */
     protected $casts = [
         'email_verified_at' => 'datetime',
+        'update_password_at' => 'datetime',
         'birth' => 'date',
         'password' => 'hashed',
         'active' => 'boolean',
@@ -72,6 +72,11 @@ class User extends Authenticatable implements JWTSubject
     public function associates()
     {
         return $this->hasMany(Associate::class);
+    }
+
+    public function theme()
+    {
+        return $this->hasOne(UserTheme::class);
     }
 
     public function companies()

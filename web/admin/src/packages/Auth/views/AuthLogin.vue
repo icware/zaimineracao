@@ -14,12 +14,12 @@ const fieldValide = new FieldValide();
 const authService = new AuthService();
 
 const router = useRouter();
-const auth = useAuthStore();
+const authStore = useAuthStore();
 
 const toast = useToast();
 
 const showError = (summary, detail) => {
-    toast.add({ severity: 'error', summary: summary, detail: detail, life: 3000 });
+    toast.add({ severity: 'error', summary: summary, detail: detail, group: 'br', life: 6000 });
 };
 
 // Datas
@@ -51,24 +51,33 @@ function dataValidate(data) {
 
 async function login() {
     const isValid = dataValidate(data);
-
     if (!isValid) {
         return;
     }
     try {
         const response = await authService.login(data);
-        auth.setToken(response.data.token);
-        window.location.href = "/dashboard";
+        if (response.status === 200) {
+            authStore.setToken(response.data.token);
+            authStore.setAuth(response.data.auth);
+
+            if (authStore.authenticated) {
+                window.location.href = '/';
+            } else {
+                showError('Acesso negado', 'Usuário não autorizado');
+            }
+        }
+
     } catch (error) {
-        showError('Falha', error.message);
+        showError('Acesso negado', error.message);
     }
 
 }
 
 onMounted(() => {
-    if (auth.getIsAuth) {
-        window.location.href = "/dashboard";
+    if (authStore.authenticated) {
+        window.location.href = '/';
     }
+
 })
 
 </script>
@@ -86,7 +95,7 @@ onMounted(() => {
                         <span class="text-600 font-medium">Faça login para continuar</span>
                     </div>
 
-                    <Toast />
+                    <Toast position="bottom-right" group="br" />
 
                     <form @submit.prevent="login">
 

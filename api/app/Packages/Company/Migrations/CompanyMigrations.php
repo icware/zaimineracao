@@ -42,7 +42,6 @@ class CompanyMigrations extends Migration
             $table->string('role')->default('invite');
             $table->boolean('enabled')->default(false);
             $table->timestamps();
-
             $table->unique(['company_id', 'user_id']);
         });
 
@@ -77,4 +76,5 @@ class CompanyMigrations extends Migration
         Schema::dropIfExists('displays');
         Schema::dropIfExists('companies');
     }
-};
+}
+;

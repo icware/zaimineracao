@@ -13,6 +13,17 @@ use Illuminate\Support\Facades\Mail;
 
 class EmailVerificationController extends Controller
 {
+
+    private function handleError(string $errorMessage, int $statusCode, ?string $errorDetails = null)
+    {
+        $response = ['error' => $errorMessage];
+        if ($errorDetails !== null) {
+            $response['error_details'] = $errorDetails;
+        }
+        return response()->json($response, $statusCode);
+    }
+
+
     public function get_email_verify(Request $request)
     {
         try {
@@ -39,8 +50,8 @@ class EmailVerificationController extends Controller
                 return response()->json(['message' => 'Usuário não encontrado.'], 404);
             }
 
-        } catch (\Exception $e) {
-            return response()->json(['message' => 'Erro ao processar a solicitação.'], 500);
+        } catch (\Exception $th) {
+            return $this->handleError('Erro interno do servidor', 500, $th->getMessage());
         }
 
     }

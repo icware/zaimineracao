@@ -20,7 +20,6 @@ class MainController extends Controller
         $formattedDate = $currentDateTime->format('Y-m-d');
         $formattedTime = $currentDateTime->format('H:i:s');
 
-
         // Informações do banco de dados
 
         $pdo = DB::connection()->getPdo();

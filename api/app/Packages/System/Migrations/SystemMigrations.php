@@ -14,14 +14,14 @@ class SystemMigrations extends Migration
             $table->id();
             $table->string('description');
             $table->timestamps();
-        });   
-        
+        });
+
         Schema::create('system_codes', function (Blueprint $table) {
             $table->id();
             $table->string('description');
             $table->string('code')->nullable()->uniqid();
             $table->timestamps();
-        });   
+        });
 
         Schema::create('servers', function (Blueprint $table) {
             $table->id();
@@ -29,6 +29,7 @@ class SystemMigrations extends Migration
             $table->string('code')->nullable()->unique();
             $table->enum('type', ['internal', 'external'])->nullable();
             $table->string('address');
+            $table->json('authorization')->nullable();
             $table->boolean('enabled')->default(true);
             $table->timestamps();
         });
@@ -38,7 +39,8 @@ class SystemMigrations extends Migration
     public function down(): void
     {
         Schema::dropIfExists('servers');
-        Schema::dropIfExists('system_codes');       
+        Schema::dropIfExists('system_codes');
         Schema::dropIfExists('systems');
     }
-};
+}
+;

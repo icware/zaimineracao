@@ -2,6 +2,9 @@
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
 import { useLayout } from '@/layout/composables/layout';
 import { useRouter } from 'vue-router';
+import { useAuthStore } from '@/store/AuthStore';
+
+const authStore = useAuthStore();
 
 const { layoutConfig, onMenuToggle } = useLayout();
 
@@ -24,6 +27,13 @@ const logoUrl = computed(() => {
 const onTopBarMenuButton = () => {
     topbarMenuActive.value = !topbarMenuActive.value;
 };
+
+const onUserLogout = () => {
+    if (authStore.authenticated) {
+        authStore.Logout();
+    }
+}
+
 const onSettingsClick = () => {
     topbarMenuActive.value = false;
     router.push('/documentation');
@@ -76,7 +86,7 @@ const isOutsideClicked = (event) => {
         </button>
 
         <div class="layout-topbar-menu" :class="topbarMenuClasses">
-            <button @click="onTopBarMenuButton()" class="p-link layout-topbar-button">
+            <!-- <button @click="onTopBarMenuButton()" class="p-link layout-topbar-button">
                 <i class="pi pi-calendar"></i>
                 <span>Eventos</span>
             </button>
@@ -87,8 +97,27 @@ const isOutsideClicked = (event) => {
             <button @click="onSettingsClick()" class="p-link layout-topbar-button">
                 <i class="pi pi-cog"></i>
                 <span>Settings</span>
-            </button>
+            </button> -->
+
+            <div v-if="authStore.authenticated">
+                <label for="buttonLogout">Logout</label>
+                <button id="buttonLogout" class="p-link layout-menu-button layout-topbar-button"
+                    @click="onUserLogout()">
+                    <i class="pi pi-power-off"></i>
+                </button>
+            </div>
+            <div v-else-if="!authStore.authenticated">
+                <label for="buttonLogin">Login</label>
+                <button id="buttonLogin" class="p-link layout-menu-button layout-topbar-button" @click="onUserLogout()">
+                    <i class="pi pi-power-off"></i>
+                </button>
+            </div>
+
+
         </div>
+
+
+
     </div>
 </template>
 

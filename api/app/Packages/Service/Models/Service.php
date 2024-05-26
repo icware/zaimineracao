@@ -13,11 +13,14 @@ class Service extends Model
     protected $table = 'services';
 
     // Defina os campos que podem ser preenchidos em massa (opcional)
-    protected $fillable = ['name'];
+    protected $fillable = ['name', 'code', 'enabled', 'server', 'type', 'settings',];
 
     // Defina os campos que devem ser ocultos ao serializar o modelo para JSON (opcional)
     protected $hidden = [];
 
     // Defina os campos que devem ser convertidos para tipos nativos (opcional)
-    protected $casts = [];
+    protected $casts = [
+        'enabled' => 'bool',
+        'settings' => 'array',
+    ];
 }

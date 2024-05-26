@@ -28,13 +28,16 @@ return new class extends Migration {
             $table->timestamps();
         });
 
-        Schema::create('user_layout_configs', function (Blueprint $table) {
+        Schema::create('user_themes', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->string('theme')->default('aura-dark-blue');
-            $table->integer('scale')->default(16);
-            $table->boolean('dark_mode')->default(false);
-            $table->string('menu_mode')->default('static');
+            $table->foreignId('user_id')->constrained()->onDelete('cascade')->unique();
+            $table->string('theme')->default('aura-dark-blue')->nullable();
+            $table->string('inputStyle')->default('outlined')->nullable();
+            $table->integer('scale')->default(12)->nullable();
+            $table->boolean('darkTheme')->default(false)->nullable();
+            $table->boolean('ripple')->default(false)->nullable();
+            $table->string('menuMode')->default('static')->nullable();
+            $table->string('activeMenuItem')->default(null)->nullable();
             $table->timestamps();
         });
     }
@@ -44,7 +47,7 @@ return new class extends Migration {
      */
     public function down(): void
     {
-        Schema::dropIfExists('user_layout_configs');
+        Schema::dropIfExists('user_themes');
         Schema::dropIfExists('users');
     }
 };

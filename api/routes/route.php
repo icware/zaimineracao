@@ -7,7 +7,7 @@ use App\Http\Controllers\Main\MainController;
 use App\Http\Controllers\Main\EmailVerificationController;
 use App\Http\Controllers\Main\ManageUserController;
 
-Route::get('/', [MainController::class, 'main'])->middleware('auth.jwt');
+Route::get('/', [MainController::class, 'main']);
 
 Route::post('/email/verify', [EmailVerificationController::class, 'get_email_verify'])->middleware('auth.jwt');
 Route::post('/email/verify/code', [EmailVerificationController::class, 'email_verify'])->middleware('auth.jwt');
@@ -23,7 +23,7 @@ Route::prefix('auth')->group(function () {
     Route::get('admin/token', [AuthController::class, 'token'])->middleware(['auth.jwt.admin']);
 
     Route::prefix('manage')->group(function () {
-        Route::get('theme', [ManageUserController::class, 'storeConfigTheme'])->middleware('auth.jwt');
+        Route::put('theme', [ManageUserController::class, 'get_or_create_theme'])->middleware('auth.jwt');
 
         Route::prefix('password')->group(function () {
             Route::put('update', [ManageUserController::class, 'update_password'])->middleware('auth.jwt');

@@ -1,4 +1,6 @@
 import { ApiError, apiRequest, apiUrls } from "../api/ApiService";
+import { useAuthStore } from '@/store/AuthStore';
+
 
 export class AuthService {
   constructor() {
@@ -30,6 +32,38 @@ export class AuthService {
       return await this.api.execute("get", url);
     } catch (error) {
       ApiError.handleError(error);
+    }
+  }
+
+  async verifyEmail() {
+    try {
+      const url = this.url.api("email/verify");
+      return await this.api.execute("post", url);
+    } catch (error) {
+      ApiError.handleError(error);
+    }
+  }
+
+  async validCode(data) {
+    try {
+      const url = this.url.api("email/verify/code");
+      return await this.api.execute("post", url, data);
+    } catch (error) {
+      ApiError.handleError(error);
+    }
+  }
+
+  async setTheme(data) {
+    const authStore = useAuthStore();
+    if (authStore.authenticated) {
+      try {
+        const url = this.url.api("auth/manage/theme");
+        const response = await this.api.execute("put", url, data);
+        authStore.setTheme(response.data);
+        return response;
+      } catch (error) {
+        ApiError.handleError(error);
+      }
     }
   }
 }

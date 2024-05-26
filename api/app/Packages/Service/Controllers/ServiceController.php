@@ -2,32 +2,48 @@
 
 namespace App\Packages\Service\Controllers;
 
-use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
 use App\Packages\Service\Models\Service;
+use App\Packages\Service\Resources\ServiceResource;
+use App\Packages\System\Controllers\SystemCodeController;
 
 class ServiceController extends Controller
 {
+
+    protected $systemCode;
+
+    public function __construct(SystemCodeController $systemCodeController)
+    {
+        $this->systemCode = $systemCodeController;
+    }
+
     public function index()
     {
-        // Recupera todos os radares e retorna como JSON
-        $radares = Service::all();
-        return response()->json($radares);
+        $object = Service::all();
+        return ServiceResource::collection($object);
     }
-
-    public function store(Request $request)
+    public function show(Service $object)
     {
-        // Valida os dados recebidos na requisição
-        $request->validate([
-            'name' => 'required|string|max:255',
-        ]);
-
-        // Cria um novo radar com base nos dados recebidos e o salva no banco de dados
-        $radar = new Service();
-        $radar->name = $request->name;
-        $radar->save();
-
-        // Retorna uma resposta JSON com o novo radar criado
-        return response()->json($radar, 201);
+        return new ServiceResource($object);
     }
+    public function store(Request $request, Service $object)
+    {
+        $object->fill($request->all());
+        $newCode = $this->systemCode->generateCode('services');
+        $object->code = $newCode;
+        $object->save();
+        return new ServiceResource($object);
+    }
+    public function update(Request $request, Service $object)
+    {
+        $object->update($request->all());
+        return new ServiceResource($object);
+    }
+    public function destroy(Service $object)
+    {
+        $object->delete();
+        return response()->json(['detail' => 'Serviço excluido'], 200);
+    }
+
 }

@@ -19,7 +19,15 @@ const AuthRouters = [
       title: "Cadastro",
     },
     component: () =>
-      import(/* webpackChunkName: "autRegister" */ "../views/AuthRegister.vue"),
+      import("../views/AuthRegister.vue"),
+  },
+  {
+    path: "/user/verify",
+    meta: {
+      title: "Verificar email",
+    },
+    component: () =>
+      import("../views/VerifyUser.vue"),
   },
 ];
 

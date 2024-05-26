@@ -5,7 +5,7 @@ import AppLayout from "@/layout/AppLayout.vue";
 import routesToservers from "@/packages/server/routes";
 import routesToUsers from "@/packages/user/routes";
 import routesToCompanies from "@/packages/company/routes";
-// import routeService from "@/packages/service/RoutesService";
+import routesToservices from "@/packages/service/RoutesService";
 
 const routes = [
   {
@@ -26,7 +26,7 @@ const routes = [
       ...routesToservers,
       ...routesToUsers,
       ...routesToCompanies,
-      // ...routeService,  
+      ...routesToservices,
     ],
   },
   ...AuthRouters,
@@ -40,10 +40,20 @@ const router = createRouter({
 router.beforeEach(async (to, from, next) => {
   document.title = to.meta.title;
 
-  const auth = useAuthStore();
+  const authStore = useAuthStore();
 
   if (!to.meta.unprotected) {
-    auth.getIsAuth ? next() : next("/login");
+    if (!authStore.authenticated) {
+      next("/login");
+    } else {
+      if (!authStore.verified && to.path !== '/user/verify') {
+        console.log(authStore.verified);
+        next("/user/verify");
+      } else {
+        next();
+      }
+    }
+
   } else {
     next();
   }

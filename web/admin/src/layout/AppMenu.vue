@@ -12,7 +12,7 @@ const model = ref([
         label: 'Sistema',
         items: [
             { label: 'Servidores', icon: 'pi pi-fw pi-server', to: '/servers' },
-            { label: 'Serviços', icon: 'pi pi-fw pi-cog', to: '/' },
+            { label: 'Serviços', icon: 'pi pi-fw pi-cog', to: '/services' },
 
         ]
 

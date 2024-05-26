@@ -9,7 +9,7 @@ use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use App\Models\ResetPassword;
 use App\Mail\ResetPasswordMail;
-use App\Models\UserLayoutConfig;
+use App\Models\UserTheme;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Hash;
@@ -88,14 +88,33 @@ class ManageUserController extends Controller
         }
     }
 
-    public function get_or_create_config(Request $request)
+    public function get_or_create_theme(Request $request)
     {
         $user = JWTAuth::parseToken()->authenticate();
-        $config = UserLayoutConfig::updateOrCreate(
-            ['user_id' => $user->id],
-            $request->only('theme', 'scale', 'dark_mode', 'menu_mode')
-        );
-        return response()->json(['status' => 'success']);
+
+        $theme = UserTheme::where('user_id', $user->id)->first();
+
+        if (!$theme) {
+            $defaultValues = [
+                'theme' => 'aura-dark-blue',
+                'scale' => 12,
+                'darkTheme' => true,
+                'menuMode' => 'static',
+                'ripple' => true,
+                'activeMenuItem' => true,
+                'inputStyle' => 'outlined'
+            ];
+
+            $theme = UserTheme::create(array_merge(['user_id' => $user->id], $defaultValues));
+        }
+
+        $updateFields = array_filter($request->all(), function ($key) {
+            return in_array($key, ['theme', 'scale', 'darkTheme', 'menuMode', 'ripple', 'activeMenuItem', 'inputStyle']);
+        }, ARRAY_FILTER_USE_KEY);
+
+        $theme->update($updateFields);
+
+        return response()->json($theme, 200);
     }
 
     public function reset_password(Request $request)

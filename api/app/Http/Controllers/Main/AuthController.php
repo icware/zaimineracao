@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\Main;
 
 use App\Models\User;
+use App\Models\UserTheme;
 use Illuminate\Http\Request;
-use App\Models\UserLayoutConfig;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
@@ -16,14 +16,9 @@ class AuthController extends Controller
     public function get_auth()
     {
         $user = JWTAuth::parseToken()->authenticate();
-        $config = UserLayoutConfig::firstOrCreate(
-            ['user_id' => $user->id],
-            ['theme' => 'aura-dark-blue', 'scale' => 12, 'dark_mode' => false, 'menu_mode' => 'static']
-        );
-
         $auth = [
             'user' => $user,
-            'config' => $config,
+            'theme' => $user->theme,
             'companies' => $user->associates->map(function ($associate) {
                 return [
                     'code' => $associate->company->code,
@@ -59,31 +54,28 @@ class AuthController extends Controller
                 return response()->json(['error' => 'Falha ao tentar se autenticar'], 400);
             }
 
-            $config = UserLayoutConfig::firstOrCreate(
+            $theme = UserTheme::firstOrCreate(
                 ['user_id' => $user->id],
-                ['theme' => 'aura-dark-blue', 'scale' => 12, 'dark_mode' => false, 'menu_mode' => 'static']
+                ['theme' => 'aura-dark-blue', 'scale' => 12, 'darkTheme' => false, 'menuMode' => 'static']
             );
 
-            $additionalData = [
-                'companies' => $user->associates->map(function ($associate) {
-                    return [
-                        'code' => $associate->company->code,
-                        'role' => $associate->role,
-                    ];
-                }),
+            $companies = $user->associates->map(function ($associate) {
+                return [
+                    'code' => $associate->company->code,
+                    'role' => $associate->role,
+                ];
+            });
+
+            $addtionalToken = [
+                'companies' => $companies
             ];
 
-            $token = auth('api')->claims($additionalData)->attempt($credentials);
+            $token = auth('api')->claims($addtionalToken)->attempt($credentials);
 
             $auth = [
                 'user' => $user,
-                'config' => $config,
-                'companies' => $user->associates->map(function ($associate) {
-                    return [
-                        'code' => $associate->company->code,
-                        'role' => $associate->role,
-                    ];
-                }),
+                'theme' => $theme,
+                'companies' => $companies,
             ];
 
             return $this->response_token($token, $auth);
@@ -96,7 +88,24 @@ class AuthController extends Controller
     {
         try {
             $user = JWTAuth::parseToken()->authenticate();
-            return response()->json($user, 200);
+
+            if (!$user->active) {
+                return response()->json(['error' => 'Usuário não está ativo'], 401);
+            }
+
+            $auth = [
+                'user' => $user,
+                'theme' => $user->theme,
+                'companies' => $user->associates->map(function ($associate) {
+                    return [
+                        'code' => $associate->company->code,
+                        'role' => $associate->role,
+                    ];
+                }),
+            ];
+
+            return response()->json($auth, 200);
+
         } catch (\Throwable $th) {
             return response()->json(['message' => 'Erro interno do servidor', 'error' => $th->getMessage()], 500);
         }

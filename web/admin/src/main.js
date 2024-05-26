@@ -3,19 +3,18 @@ import App from './App.vue';
 import router from './router';
 import { createPinia } from 'pinia';
 import registerPrimeVue from './prime';
-import checkAuth from './auth';
-import { setTheme } from './config';
+import { useAuthStore } from '@/store/AuthStore';
 
 import '@/assets/styles.scss';
-
-setTheme();
 
 const app = createApp(App);
 
 app.use(router);
 app.use(createPinia())
+const authStore = useAuthStore();
 
-checkAuth();
+authStore.validate();
+authStore.applayTheme();
 
 registerPrimeVue(app);
 
