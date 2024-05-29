@@ -42,6 +42,13 @@
 <script setup>
 import { useToast } from 'primevue/usetoast';
 import Toast from 'primevue/toast';
+import { reactive } from 'vue';
+
+const data = reactive({
+    link: '',
+    email: '',
+    directory: '',
+});
 
 
 const toast = useToast();
