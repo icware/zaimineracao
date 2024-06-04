@@ -61,7 +61,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useToast } from 'primevue/usetoast';
 
@@ -74,25 +74,15 @@ const cancel = () => {
 }
 
 const data = ref({
-    name: '',
-    capacity: '',
-    minimum: '',
-    average: '',
+    name: 'Primário',
+    capacity: '500.0',
+    minimum: '100.0',
+    average: '150.00',
     order: 0,
-    visible: false,
-    active: false,
-    main: false,
-    primary: false,
-});
-
-onMounted(() => {
-    // Pegar os parâmetros da URL
-    data.value.name = route.query.name || '';
-    data.value.capacity = route.query.capacity || '';
-    data.value.minimum = route.query.minimum || '';
-    data.value.average = route.query.average || '';
-    data.value.visible = route.query.visible === 'Sim';
-    // Ajuste os valores conforme necessário
+    visible: true,
+    active: true,
+    main: true,
+    primary: true,
 });
 
 const show = () => {
