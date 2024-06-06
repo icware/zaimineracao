@@ -5,9 +5,9 @@
             <div class="card">
                 <DataTable :value="addArea" tableStyle="min-width: 50rem">
                     <Column field="name" header="Área"></Column>
-                    <Column field="capacity" header="Capacidade t/h"></Column>
-                    <Column field="minimum" header="Mínima t/h"></Column>
-                    <Column field="average" header="Média t/h"></Column>
+                    <Column field="accumulated" header="Capacidade t/h"></Column>
+                    <Column field="min" header="Mínima t/h"></Column>
+                    <Column field="med" header="Média t/h"></Column>
                     <Column field="visible" header="Visibilidade"></Column>
                     <Column field="options" header="Opções">
                         <template #body="{ data }">
@@ -43,9 +43,9 @@ onMounted(() => {
     if (companyData && companyData.areas) {
         addArea.value = companyData.areas.map(area => ({
             name: area.name,
-            capacity: area.accumulated.value,
-            minimum: area.timers.min_capacity,
-            average: area.timers.med_capacity,
+            accumulated: area.accumulated.value,
+            min: area.timers.min_capacity,
+            med: area.timers.med_capacity,
             visible: area.visible ? 'Sim' : 'Não'
         }));
     }

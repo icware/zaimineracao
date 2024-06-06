@@ -1,7 +1,7 @@
 <template>
     <Card>
         <template #title>Configurações</template>
-        <template #subtitle>Primário</template>
+        <template #subtitle>{{ data.name }}</template>
         <template #content>
             <div class="card">
                 <div class="grid flex justify-content-evenly gap-5">
@@ -11,18 +11,18 @@
                     </div>
 
                     <div class="flex flex-column gap-2">
-                        <label for="capacity">Capacidade t/h</label>
-                        <InputText id="capacity" v-model="data.capacity" aria-describedby="capacity-help" />
+                        <label for="accumulated">Capacidade t/h</label>
+                        <InputText id="accumulated" v-model="data.accumulated" aria-describedby="accumulated-help" />
                     </div>
 
                     <div class="flex flex-column gap-2">
                         <label for="minimum">Mínima t/h</label>
-                        <InputText id="minimum" v-model="data.minimum" aria-describedby="minimum-help" />
+                        <InputText id="minimum" v-model="data.min" aria-describedby="minimum-help" />
                     </div>
 
                     <div class="flex flex-column gap-2">
                         <label for="average">Média t/h</label>
-                        <InputText id="average" v-model="data.average" aria-describedby="average-help" />
+                        <InputText id="average" v-model="data.med" aria-describedby="average-help" />
                     </div>
 
                     <div class="flex flex-column gap-2">
@@ -62,32 +62,33 @@
 
 <script setup>
 import { ref } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
+import { useRouter } from 'vue-router';
 import { useToast } from 'primevue/usetoast';
 
 const toast = useToast();
-const route = useRoute();
 const router = useRouter();
+const data = ref({
+    name: 'Teste',
+    accumulated: '200 t',
+    min: '20%',
+    med: '58%',
+    visible: true,
+    active: true,
+    main: true,
+    primary: true,
+    order: 0,
+});
 
 const cancel = () => {
     router.push('/company/areas');
 }
 
-const data = ref({
-    name: 'Primário',
-    capacity: '500.0',
-    minimum: '100.0',
-    average: '150.00',
-    order: 0,
-    visible: true,
-    active: true,
-    main: true,
-    primary: true,
-});
 
 const show = () => {
     toast.add({ severity: 'info', summary: 'Info', detail: 'Mensagem de Teste', life: 3000 });
 };
+
+
 </script>
 
 <style>

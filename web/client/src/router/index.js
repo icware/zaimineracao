@@ -55,9 +55,17 @@ const routes = [
         path: "/company/areas/config",
         name: "companyConfigAreas",
         meta: {
-          title: "Áreas | Settings",
+          title: "Àreas | Settings",
         },
         component: () => import("@/views/company/CompanyConfigArea.vue"),
+      },
+      {
+        path: "/company/detail",
+        name: "companyDetail",
+        meta: {
+          title: "Detalhes de Produção",
+        },
+        component: () => import("@/views/company/CompanyDetail.vue"),
       },
     ],
   },
