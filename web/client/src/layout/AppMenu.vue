@@ -12,7 +12,8 @@ const model = ref([
         label: 'Usuário',
         items: [
             { label: 'Unidades', icon: 'pi pi-building', to: '/companies' },
-            { label: 'Áreas', icon: 'pi pi-chart-bar', to: '/company/areas' }
+            { label: 'Áreas', icon: 'pi pi-chart-bar', to: '/company/areas' },
+            { label: 'Lista de Usuários', icon: 'pi pi-users', to: '/company/areas/users' }
         ]
 
     }
