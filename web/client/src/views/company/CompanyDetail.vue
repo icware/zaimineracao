@@ -72,7 +72,7 @@ import { useCompanyStore } from '../../store/CompanyStore';
 
 
 const addDetails = ref([]);
-const useComany = useCompanyStore();
+const { getCompanyData } = useCompanyStore();
 const addLogistics = ref([
     { total: 'Não existem dados para este périodo.' }
 ]);
@@ -82,8 +82,8 @@ const addFrota = ref([
 ]);
 
 
-onMounted(() => {
-    const companyData = useComany.getCompanyData;
+const fetchCompanyData = async () => {
+    const companyData = await getCompanyData;
 
     if (companyData && companyData.areas) {
         addDetails.value = companyData.areas.map(area => ({
@@ -106,6 +106,11 @@ onMounted(() => {
 
         }));
     }
+
+}
+
+onMounted(async () => {
+    await fetchCompanyData();
 });
 
 
