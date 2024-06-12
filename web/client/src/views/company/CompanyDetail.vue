@@ -9,7 +9,7 @@
 
         <template #content>
             <div class="card">
-                <DataTable :value="addDetails" tableStyle="min-width: 50rem">
+                <DataTable :value="addDetails">
                     <Column field="status" header="St">
                         <template #body="slotProps">
                             <i

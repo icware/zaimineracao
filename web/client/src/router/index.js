@@ -45,17 +45,17 @@ const routes = [
       },
       {
         path: "/company/areas",
-        name: "companyAreas",
+        name: "Áreas",
         meta: {
           title: "Company | Áreas",
         },
         component: () => import("@/views/company/CompanyAreas.vue"),
       },
       {
-        path: "/company/areas/config",
-        name: "companyConfigAreas",
+        path: "/company/areas/config/:areaId",
+        name: "Config-Áreas",
         meta: {
-          title: "Àreas | Settings",
+          title: "Áreas | Settings",
         },
         component: () => import("@/views/company/CompanyConfigArea.vue"),
       },
