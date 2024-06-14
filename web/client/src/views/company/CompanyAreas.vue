@@ -3,7 +3,7 @@
     <template #title>{{ companyName.name }}</template>
     <template #content>
       <div class="card">
-        <DataTable :value="addArea">
+        <DataTable :value="addArea" tableStyle="min-width:50rem">
           <Column field="name" header="Área"></Column>
           <Column field="max" header="Capacidade t/h"></Column>
           <Column field="med" header="Média t/h"></Column>
