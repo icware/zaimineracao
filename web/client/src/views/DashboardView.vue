@@ -342,8 +342,8 @@ const removeFilter = async () => {
                                                     :options="lineOptions" />
 
                                                 <Dropdown v-model="item.chartType" :options="chartOptions"
-                                                    optionLabel="label" class="mr-2" placeholder="Tipo de grafivo"
-                                                    @change="onChartTypeChange(item.chartType, item.id)" />
+                                                    optionLabel="label" class="mr-2 mt-4" placeholder="Tipo de gráfico"
+                                                    @change="onChartTypeChange(item.chartType.value, item.id)" />
                                             </div>
                                             <div>
                                                 <Checkbox v-model="item.showChart" id="item.id" binary class="mr-2"
